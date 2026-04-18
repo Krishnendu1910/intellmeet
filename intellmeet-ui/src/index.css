@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@keyframes gradientMove {
+  0% { transform: translateX(-20%) translateY(-20%) scale(1); }
+  50% { transform: translateX(20%) translateY(20%) scale(1.1); }
+  100% { transform: translateX(-20%) translateY(-20%) scale(1); }
+}
+
+.animate-gradient {
+  animation: gradientMove 12s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 6px rgba(34,211,238,0.6));
+  }
+  20%, 24%, 55% {
+    opacity: 0.4;
+    filter: none;
+  }
+}
+
+@keyframes shakeX {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  20% { transform: translate3d(-10px, 0, 0); }
+  40% { transform: translate3d(10px, 0, 0); }
+  60% { transform: translate3d(-6px, 0, 0); }
+  80% { transform: translate3d(6px, 0, 0); }
+}
+
+.animate-shake {
+  animation: shakeX 0.4s ease;
+}

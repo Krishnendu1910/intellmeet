@@ -1,0 +1,13 @@
+# Dependencies (Massive folders that Render/Vercel will install themselves)
+node_modules/
+dist/
+build/
+
+# Private Secrets (NEVER push these)
+.env
+.env.local
+.env.production
+
+# System Trash
+.DS_Store
+Thumbs.db
