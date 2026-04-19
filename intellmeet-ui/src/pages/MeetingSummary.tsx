@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Sparkles, CheckCircle, Calendar, ArrowLeft, Loader2, BarChart3, Users, Download } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { Sparkles, ArrowLeft, Loader2, BarChart3, Users, Download } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useAuthStore } from '../store/authStore'; 
 
 export default function MeetingSummary() {
