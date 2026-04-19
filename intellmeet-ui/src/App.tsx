@@ -76,7 +76,7 @@ const Dashboard = () => {
     return (localStorage.getItem('intellmeet_active_tab') as any) || 'home';
   });
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [trailPoints, setTrailPoints] = useState<{ x: number, y: number }[]>([]);
   const [isMouseOnMain, setIsMouseOnMain] = useState(false);
@@ -485,21 +485,28 @@ const Dashboard = () => {
     <div className="min-h-[100dvh] bg-[#020617] text-white flex flex-col md:flex-row font-sans relative overflow-hidden">
 
       {/* SIDEBAR */}
-      {/* <div
-        className={`bg-white/[0.02] backdrop-blur-3xl border-t md:border-t-0 md:border-r border-white/10 flex flex-col justify-between fixed bottom-0 md:relative z-[110] transition-all duration-500 ease-in-out ${isSidebarOpen ? 'w-full md:w-64' : 'w-full md:w-20'
-          }`}
-        onMouseEnter={() => setIsMouseOnMain(false)}
-      > */}
       <div
         className={`
-    bg-white/[0.02] backdrop-blur-3xl border-r border-white/10
-    flex flex-col justify-between
-    transition-all duration-500 ease-in-out
-    ${isSidebarOpen ? 'w-64' : 'w-20'}
-  `}
+          fixed md:relative top-0 left-0 h-full z-[110]
+        bg-white/[0.02] backdrop-blur-3xl border-r border-white/10
+          flex flex-col justify-between
+          transition-all duration-300 ease-in-out
+
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+
+          w-[85%] sm:w-[70%]
+          ${isSidebarOpen ? 'md:w-64' : 'md:w-20'}
+        `}
       >
 
         {/* Top Section */}
+        {/* Mobile Close Button */}
+        <button
+          className="md:hidden absolute top-4 right-4 z-[120] text-white"
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          <X size={22} />
+        </button>
         <div
           className={`hidden md:flex items-center gap-3 p-6 border-b border-white/10 h-[80px] ${!isSidebarOpen && 'justify-center'
             }`}
@@ -594,6 +601,22 @@ const Dashboard = () => {
 
       </div>
 
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[90] md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <div className="md:hidden fixed top-4 left-4 z-[200]">
+        <button
+          onClick={() => setIsSidebarOpen(prev => !prev)}
+          className="bg-gradient-to-br from-teal-500 to-cyan-500 p-2 rounded-xl shadow-lg"
+        >
+          <Menu size={20} />
+        </button>
+      </div>
+
       {/* CONTENT AREA */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden relative z-10 transition-all duration-500" onMouseMove={handleMouseMove} onMouseEnter={() => setIsMouseOnMain(true)}>
         <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none bg-[#020617]">
@@ -602,9 +625,9 @@ const Dashboard = () => {
           <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
           {isMouseOnMain && (
             <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(200px circle at ${mouse.x - (window.innerWidth > 768 ? (isSidebarOpen ? 256 : 80) : 0)}px ${mouse.y}px, rgba(34,211,238,0.18), transparent 60%)` }} />)}</div>
-          {isMouseOnMain && trailPoints.map((p, i) => (
-            <div key={i} className="absolute pointer-events-none rounded-full" style={{ left: p.x - (window.innerWidth > 768 ? (isSidebarOpen ? 256 : 80) : 0), top: p.y, width: 160 - i * 8, height: 160 - i * 8, transform: "translate(-50%, -50%)", background: "radial-gradient(circle, rgba(34,211,238,0.25), transparent 70%)", opacity: 0.7 - i * 0.06, filter: "blur(14px)", zIndex: 0 }} />
-          ))}
+        {isMouseOnMain && trailPoints.map((p, i) => (
+          <div key={i} className="absolute pointer-events-none rounded-full" style={{ left: p.x - (window.innerWidth > 768 ? (isSidebarOpen ? 256 : 80) : 0), top: p.y, width: 160 - i * 8, height: 160 - i * 8, transform: "translate(-50%, -50%)", background: "radial-gradient(circle, rgba(34,211,238,0.25), transparent 70%)", opacity: 0.7 - i * 0.06, filter: "blur(14px)", zIndex: 0 }} />
+        ))}
 
         <div className="w-full max-w-[1400px] mx-auto p-4 sm:p-6 md:p-10 pb-24 md:pb-10 relative z-20">
           {toast && (<div className={`fixed top-4 right-4 p-4 rounded-xl shadow-2xl z-[200] border-l-4 animate-in slide-in-from-top-4 fade-in ${toast.type === 'success' ? 'bg-slate-900 border-emerald-500 text-emerald-400' : 'bg-slate-900 border-red-500 text-red-400'}`}><p className="font-semibold text-sm">{toast.msg}</p></div>)}
@@ -2157,7 +2180,9 @@ const Dashboard = () => {
 
         </div>
       </div>
-      <div className="md:hidden flex items-center justify-between p-4 border-b border-white/10 bg-[#020617]/80 backdrop-blur-2xl fixed top-0 left-0 right-0 z-[130]"><div className="flex items-center gap-2" onClick={() => setIsSidebarOpen(!isSidebarOpen)}><div className="bg-gradient-to-br from-teal-500 to-cyan-500 p-2 rounded-lg shadow-md"><Menu size={18} className="text-white" /></div><h1 className="text-lg font-bold tracking-widest text-white uppercase">INTELLMEET</h1></div><button onClick={() => { logout(); navigate('/'); }} className="text-slate-400 p-2 hover:text-red-400 transition-colors"><LogOut size={18} /></button></div>
+      <div className="md:hidden flex items-center justify-between p-4 border-b border-white/10 bg-[#020617]/80 backdrop-blur-2xl fixed top-0 left-0 right-0 z-[130]"><div className="flex items-center gap-2"
+        onClick={() => setIsSidebarOpen(prev => !prev)}>
+        <div className="bg-gradient-to-br from-teal-500 to-cyan-500 p-2 rounded-lg shadow-md"><Menu size={18} className="text-white" /></div><h1 className="text-lg font-bold tracking-widest text-white uppercase">INTELLMEET</h1></div><button onClick={() => { logout(); navigate('/'); }} className="text-slate-400 p-2 hover:text-red-400 transition-colors"><LogOut size={18} /></button></div>
     </div>
   );
 };

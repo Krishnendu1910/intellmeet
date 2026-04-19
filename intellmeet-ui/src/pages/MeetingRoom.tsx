@@ -47,7 +47,7 @@ const VideoPlayer = memo(({ stream, name, profilePic, isMuted = false, isVideoOf
   }, [stream, isVideoOff]);
 
   return (
-    <div className={`bg-slate-900 h-full w-full min-h-[120px] sm:min-h-[150px] relative flex items-center justify-center rounded-2xl overflow-hidden group border-2 shadow-lg transition-all ${isSpeaking ? 'border-blue-500 shadow-blue-500/30' : 'border-slate-800'}`}>
+    <div className={`bg-slate-900 h-full w-full relative flex items-center justify-center rounded-2xl overflow-hidden group border-2 shadow-lg transition-all ${isSpeaking ? 'border-blue-500 shadow-blue-500/30' : 'border-slate-800'}`}>
       {isVideoOff ? (
         <div className={`h-20 w-20 md:h-24 md:w-24 rounded-full flex items-center justify-center font-bold text-slate-300 text-3xl uppercase shadow-xl border-4 overflow-hidden transition-all ${isSpeaking ? 'bg-slate-700 border-blue-500 shadow-blue-500/40' : 'bg-slate-800 border-slate-700'}`}>
           {profilePic ? (
@@ -74,7 +74,7 @@ const VideoPlayer = memo(({ stream, name, profilePic, isMuted = false, isVideoOf
 
       <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 bg-slate-900/80 backdrop-blur-md pl-2 pr-3 py-1.5 rounded-lg text-[10px] md:text-xs font-medium border border-slate-700/50 text-white flex items-center gap-1.5 shadow-lg z-10">
         {isMuted ? <MicOff size={14} className="text-red-500" /> : <Mic size={14} className={isSpeaking ? "text-blue-400" : "text-emerald-500"} />}
-        <span className="truncate max-w-[80px] sm:max-w-[120px] md:max-w-[150px]">{name}</span>
+        <span className="truncate max-w-[100px] md:max-w-[150px]">{name}</span>
       </div>
     </div>
   );
@@ -922,7 +922,7 @@ export default function MeetingRoom() {
     return (
       <div
         onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
-        className="min-h-screen bg-[#020617] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden"
+        className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden"
       >
         <FloatingEmojiStyles />
 
@@ -981,7 +981,7 @@ export default function MeetingRoom() {
 
             {/* Left: Video Preview Section */}
             <div className="w-full flex flex-col justify-between h-full">
-              <div className="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-white/10 shadow-2xl group flex-1 min-h-[200px] sm:min-h-[260px]">
+              <div className="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-white/10 shadow-2xl group flex-1 min-h-[260px]">
                 <div className="absolute inset-0">
                   <VideoPlayer
                     stream={myStream}
@@ -997,11 +997,11 @@ export default function MeetingRoom() {
 
 
                 {/* Internal Overlay Controls */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 md:gap-4 flex-wrap justify-center z-30">
-                  <button onClick={toggleMute} className={`p-3 sm:p-4 rounded-2xl transition-all duration-300 ${isMuted ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4 z-30">
+                  <button onClick={toggleMute} className={`p-4 rounded-2xl transition-all duration-300 ${isMuted ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>
                     {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
                   </button>
-                  <button onClick={toggleVideo} className={`p-3 sm:p-4 rounded-2xl transition-all duration-300 ${isVideoOff ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>
+                  <button onClick={toggleVideo} className={`p-4 rounded-2xl transition-all duration-300 ${isVideoOff ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>
                     {isVideoOff ? <VideoOff size={20} /> : <VideoIcon size={20} />}
                   </button>
                 </div>
@@ -1073,7 +1073,7 @@ export default function MeetingRoom() {
         />
 
         {/* 🎯 CARD */}
-        <div className="relative w-full max-w-md w-full mx-4 p-8 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_70px_rgba(0,0,0,0.8)] text-center animate-in fade-in zoom-in duration-500">
+        <div className="relative w-full max-w-md p-8 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_70px_rgba(0,0,0,0.8)] text-center animate-in fade-in zoom-in duration-500">
 
           {/* 🔄 SPINNER */}
           <div className="relative flex justify-center mb-6">
@@ -1113,7 +1113,7 @@ export default function MeetingRoom() {
   return (
     <div
       onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
-      className="fixed inset-0 h-[100dvh] w-full text-white flex flex-col md:flex-row overflow-hidden font-sans bg-[#020617]"
+      className="fixed inset-0 h-[100dvh] w-full text-white flex overflow-hidden font-sans bg-[#020617]"
     >
 
 
@@ -1176,7 +1176,7 @@ export default function MeetingRoom() {
       {showSidebar && (
         <div
           className="
-      fixed top-0 right-0 h-full w-[90%] sm:w-[80%] max-w-[350px]
+      fixed top-0 right-0 h-full w-[85%] max-w-[350px]
       bg-slate-950 border-l border-slate-800
       z-[999] flex flex-col
     "
@@ -1209,7 +1209,7 @@ export default function MeetingRoom() {
 
 
       {/* ✅ KEEP THIS (Floating Emojis) */}
-      <div className="fixed inset-0 pointer-events-none z-[1000] overflow-hidden px-2">
+      <div className="fixed inset-0 pointer-events-none z-[1000] overflow-hidden">
         {floatingEmojis.map(emoji => (
           <div
             key={emoji.id}
@@ -1512,11 +1512,7 @@ export default function MeetingRoom() {
       )}
 
 
-      <div
-        className={
-          `flex-1 flex flex-col p-2 sm:p-3 md:p-4 relative transition-all duration-300 
-        ${showSidebar ? 'md:mr-[350px]' : 'w-full'} h-full min-w-0`
-        }>
+      <div className={`flex-1 flex flex-col p-2 md:p-4 relative transition-all duration-300 ${showSidebar ? 'md:mr-[350px]' : 'w-full'} h-full`}>
 
         {toastNotification && (
           <div className="absolute top-4 right-4 md:top-8 md:right-8 bg-slate-800 border-l-4 border-blue-500 shadow-2xl px-4 py-3 rounded-lg z-50 flex flex-col animate-in slide-in-from-top-4 fade-in duration-300 max-w-xs">
@@ -1526,7 +1522,7 @@ export default function MeetingRoom() {
         )}
 
         {/* HEADER */}
-        <div className="flex flex-wrap justify-between items-center gap-2 mb-3 md:mb-5 px-3 md:px-4 z-10 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.6)] py-2 md:py-3">
+        <div className="flex justify-between items-center mb-3 md:mb-5 px-3 md:px-4 z-10 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.6)] py-2 md:py-3">
 
           {/* 🧠 ROOM INFO */}
           <h2 className="text-sm md:text-xl font-bold tracking-tight flex items-center gap-3">
@@ -1660,13 +1656,7 @@ export default function MeetingRoom() {
             </div>
           ) : null}
 
-          <div
-            className={`grid min-h-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
-            ${displayPinnedId
-                ? 'grid-cols-3 md:grid-cols-1 w-full md:w-64 h-[25%] md:h-full flex-shrink-0 overflow-y-auto content-start auto-rows-[100px] md:auto-rows-[140px] gap-2 sm:gap-3 md:gap-4'
-                : `${getGridClasses(totalTiles)} auto-rows-[minmax(120px,1fr)] sm:auto-rows-[minmax(150px,1fr)] w-full h-full gap-2 sm:gap-3 md:gap-4`
-              }`}
-          >
+          <div className={`grid gap-2 md:gap-4 min-h-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${displayPinnedId ? 'grid-cols-3 md:grid-cols-1 w-full md:w-64 h-[25%] md:h-full flex-shrink-0 overflow-y-auto content-start auto-rows-[100px] md:auto-rows-[140px]' : `${getGridClasses(totalTiles)} w-full h-full flex-1`}`}>
             {activePeers.map(id => {
               if (id === displayPinnedId) return null;
               if (id === 'local-screen') {
@@ -1746,7 +1736,7 @@ export default function MeetingRoom() {
             {/* 🎤 MIC */}
             <button
               onClick={toggleMute}
-              className={`group p-3 sm:p-4 md:p-4 rounded-full transition-all duration-300 shrink-0 
+              className={`group p-3 md:p-4 rounded-full transition-all duration-300 shrink-0 
               transform hover:scale-110 active:scale-95
               ${isMuted
                   ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)]'
@@ -1886,7 +1876,7 @@ export default function MeetingRoom() {
       {showSidebar && (
         <div
           className={`
-        fixed top-0 right-0 h-full w-[90%] sm:w-[80%] max-w-[350px]
+        fixed top-0 right-0 h-full w-[85%] max-w-[350px]
         bg-slate-950 border-l border-slate-800
         z-50 transform transition-transform duration-300
         md:translate-x-0 md:relative md:w-[350px]
@@ -1959,7 +1949,7 @@ export default function MeetingRoom() {
 
           {/* ================= CHAT ================= */}
           {activeTab === 'chat' && (
-            <div className="flex-1 flex flex-col bg-transparent min-h-0 min-w-0 overflow-hidden">
+            <div className="flex-1 flex flex-col bg-transparent min-h-0 overflow-hidden">
               <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-6 custom-scrollbar">
                 {messages.length === 0 ? (
                   <div className="text-center flex flex-col items-center justify-center h-full text-slate-500">
@@ -2060,7 +2050,7 @@ export default function MeetingRoom() {
                     <Plus size={20} />
                     <input
                       type="file"
-                      className="hidden w-full min-w-0"
+                      className="hidden"
                       accept="image/*,application/pdf,.doc,.docx"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
@@ -2101,7 +2091,7 @@ export default function MeetingRoom() {
                     value={chatInput}
                     onChange={handleTyping}
                     placeholder="Send matrix log..."
-                    className="flex-1 bg-transparent px-2 sm:px-3 py-3 text-sm text-white placeholder-slate-600 outline-none font-mono w-full min-w-0"
+                    className="flex-1 bg-transparent px-2 py-3 text-sm text-white placeholder-slate-600 outline-none font-mono"
                   />
 
                   <button
@@ -2154,7 +2144,7 @@ export default function MeetingRoom() {
                       value={newTaskInput}
                       onChange={(e) => setNewTaskInput(e.target.value)}
                       placeholder="Initialize new task..."
-                      className="flex-1 bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all placeholder:text-slate-600 w-full min-w-0"
+                      className="flex-1 bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all placeholder:text-slate-600"
                     />
                     <button
                       type="submit"
