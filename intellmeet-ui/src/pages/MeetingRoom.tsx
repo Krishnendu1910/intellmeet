@@ -1167,8 +1167,11 @@ export default function MeetingRoom() {
 
 
       {showSidebar && (
-        <div className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={() => setShowSidebar(false)} />
-      )}
+        <div className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40" 
+        onClick={() => setShowSidebar(false)} 
+        />
+      )
+    }
 
 
 
@@ -1840,12 +1843,17 @@ export default function MeetingRoom() {
       </div>
 
 
-      <div className={`${showSidebar ? 'translate-x-0' : 'translate-x-full'} 
-        fixed top-0 right-0 h-[100dvh] w-full md:w-[360px] 
-        bg-white/5 backdrop-blur-2xl 
-        border-l border-white/10 
-        shadow-[0_0_60px_rgba(0,0,0,0.8)] 
-        z-[60] flex flex-col transition-transform duration-500 ease-out`}>
+      <div
+        className={`
+        fixed top-0 right-0 h-full w-[85%] max-w-[350px]
+      bg-slate-950 border-l border-slate-800
+        z-50 transform transition-transform duration-300
+
+        ${showSidebar ? 'translate-x-0' : 'translate-x-full'}
+
+        md:translate-x-0 md:relative md:w-[350px]
+        `}
+      >
 
         {/* 🌊 Gradient Overlay */}
         <div className="absolute inset-0 -z-10">
