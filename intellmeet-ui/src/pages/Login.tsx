@@ -24,7 +24,6 @@ export default function Login() {
                 .map((char, index) => {
                     if (index < i) return fullText[index];
 
-                    // slow glitch change (not every frame)
                     return Math.random() > 0.5
                         ? chars[Math.floor(Math.random() * chars.length)]
                         : fullText[index];
@@ -38,12 +37,11 @@ export default function Login() {
                 clearInterval(interval);
                 setDisplayText(fullText);
             }
-        }, 130); // 🔥 slower & smoother
+        }, 130);
 
         return () => clearInterval(interval);
     }, []);
 
-    // 🔥 Mouse position for grid glow
     const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
     const setAuth = useAuthStore((state) => state.setAuth);
@@ -56,7 +54,7 @@ export default function Login() {
         const animate = () => {
             setTrailPoints(prev => {
                 const next = [{ x: mouse.x, y: mouse.y }, ...prev];
-                return next.slice(0, 12); // tail length
+                return next.slice(0, 12);
             });
             requestAnimationFrame(animate);
         };
@@ -75,7 +73,7 @@ export default function Login() {
     const rafRef = useRef<number | null>(null);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (rafRef.current) return; // Throttle to 60fps
+        if (rafRef.current) return;
 
         rafRef.current = requestAnimationFrame(() => {
             setMouse({ x: e.clientX, y: e.clientY });
@@ -132,21 +130,17 @@ export default function Login() {
             onMouseMove={handleMouseMove}
             onClick={handleClick}
             onMouseLeave={() => setMouse({ x: -9999, y: -9999 })}
-            className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden"
+            className="min-h-screen bg-[#020617] flex items-center justify-center px-4 sm:px-6 py-6 relative overflow-hidden"
         >
 
-            {/* 🌊 Animated Gradient */}
             <div className="absolute inset-0 -z-10 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-3xl animate-gradient"></div>
             </div>
 
-            {/* Base Gradient */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(34,211,238,0.15),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(16,185,129,0.15),transparent_40%)]"></div>
 
-            {/* Grid */}
             <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
-            {/* 🟢 Mouse Glow Effect */}
             <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -158,7 +152,6 @@ export default function Login() {
                 }}
             ></div>
 
-            {/* 🟢 Comet Trail Glow */}
             {trailPoints.map((p, i) => (
                 <div
                     key={i}
@@ -176,14 +169,11 @@ export default function Login() {
                 />
             ))}
 
-            {/* Noise */}
             <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/asfalt-light.png')]"></div>
 
-            {/* Card */}
-            <div className="relative w-full max-w-md p-8 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
+            <div className="relative w-full max-w-md sm:max-w-lg p-5 sm:p-8 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
 
-                {/* Logo */}
-                <div className="flex flex-col items-center mb-8">
+                <div className="flex flex-col items-center mb-6 sm:mb-8">
                     <div className="bg-gradient-to-br from-teal-500 to-cyan-500 p-3 rounded-2xl shadow-lg shadow-cyan-500/30">
                         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white">
                             <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11" />
@@ -191,27 +181,26 @@ export default function Login() {
                         </svg>
                     </div>
 
-                    <h1 className="mt-6 text-3xl font-semibold tracking-[0.25em] text-white text-center">
+                    <h1 className="mt-5 sm:mt-6 text-xl sm:text-3xl font-semibold tracking-[0.2em] sm:tracking-[0.25em] text-white text-center">
                         <span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent animate-[flicker_2s_infinite]">
                             {displayText}
                         </span>
                     </h1>
 
-                    <p className="text-slate-400 text-sm mt-4 text-center">
+                    <p className="text-slate-400 text-xs sm:text-sm mt-3 sm:mt-4 text-center">
                         Enter your credentials to access your account
                     </p>
                 </div>
 
-                {/* Error */}
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg mb-6 text-sm text-center">
+                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-2 sm:p-3 rounded-lg mb-4 sm:mb-6 text-xs sm:text-sm text-center">
                         {error}
                     </div>
                 )}
-                <form onSubmit={handleLogin} className="space-y-6">
-                    {/* Email Input */}
+
+                <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
                     <div>
-                        <label className="block text-slate-400 text-sm mb-2 transition-colors focus-within:text-cyan-400">
+                        <label className="block text-slate-400 text-xs sm:text-sm mb-1 sm:mb-2 transition-colors focus-within:text-cyan-400">
                             Email Address
                         </label>
 
@@ -234,15 +223,14 @@ export default function Login() {
                                 onMouseMove={handleInputMouseMove}
                                 onMouseLeave={handleInputLeave}
                                 placeholder="name@company.com"
-                                className="relative w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-slate-500 outline-none transition-all duration-300 ease-out hover:scale-[1.02] focus:scale-[1.03] focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 focus:shadow-[0_0_15px_rgba(34,211,238,0.25)]"
+                                className="relative w-full pl-10 pr-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder:text-slate-500 outline-none transition-all duration-300 ease-out sm:hover:scale-[1.02] sm:focus:scale-[1.03] focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 focus:shadow-[0_0_15px_rgba(34,211,238,0.25)]"
                                 required
                             />
                         </div>
                     </div>
 
-                    {/* Password */}
                     <div>
-                        <label className="block text-slate-400 text-sm mb-2 transition-colors focus-within:text-cyan-400">
+                        <label className="block text-slate-400 text-xs sm:text-sm mb-1 sm:mb-2 transition-colors focus-within:text-cyan-400">
                             Password
                         </label>
 
@@ -265,11 +253,10 @@ export default function Login() {
                                 onMouseMove={handleInputMouseMove}
                                 onMouseLeave={handleInputLeave}
                                 placeholder="Enter your password"
-                                className="relative w-full pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-slate-500 outline-none transition-all duration-300 ease-out hover:scale-[1.02] focus:scale-[1.03] focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 focus:shadow-[0_0_15px_rgba(34,211,238,0.25)]"
+                                className="relative w-full pl-10 pr-10 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder:text-slate-500 outline-none transition-all duration-300 ease-out sm:hover:scale-[1.02] sm:focus:scale-[1.03] focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 focus:shadow-[0_0_15px_rgba(34,211,238,0.25)]"
                                 required
                             />
 
-                            {/* Eye Toggle */}
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
@@ -279,7 +266,6 @@ export default function Login() {
                             </button>
                         </div>
 
-                        {/* ✅ Forgot Password BELOW input (right aligned) */}
                         <div className="flex justify-end mt-2">
                             <Link
                                 to="/forgot-password"
@@ -290,17 +276,16 @@ export default function Login() {
                         </div>
                     </div>
 
-                    {/* Button */}
                     <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-semibold py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 active:scale-[0.97]"
+                        className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-semibold py-2.5 sm:py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 active:scale-[0.97]"
                     >
                         Connect to Workspace
                     </button>
 
                 </form>
 
-                <p className="mt-8 text-center text-slate-400 text-sm">
+                <p className="mt-6 sm:mt-8 text-center text-slate-400 text-xs sm:text-sm">
                     Don't have an account?{" "}
                     <Link to="/register" className="text-cyan-400 hover:text-cyan-300 transition">
                         Create one for free

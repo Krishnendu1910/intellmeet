@@ -47,7 +47,7 @@ const VideoPlayer = memo(({ stream, name, profilePic, isMuted = false, isVideoOf
   }, [stream, isVideoOff]);
 
   return (
-    <div className={`bg-slate-900 h-full w-full relative flex items-center justify-center rounded-2xl overflow-hidden group border-2 shadow-lg transition-all ${isSpeaking ? 'border-blue-500 shadow-blue-500/30' : 'border-slate-800'}`}>
+    <div className={`bg-slate-900 h-full w-full min-h-[120px] sm:min-h-[150px] relative flex items-center justify-center rounded-2xl overflow-hidden group border-2 shadow-lg transition-all ${isSpeaking ? 'border-blue-500 shadow-blue-500/30' : 'border-slate-800'}`}>
       {isVideoOff ? (
         <div className={`h-20 w-20 md:h-24 md:w-24 rounded-full flex items-center justify-center font-bold text-slate-300 text-3xl uppercase shadow-xl border-4 overflow-hidden transition-all ${isSpeaking ? 'bg-slate-700 border-blue-500 shadow-blue-500/40' : 'bg-slate-800 border-slate-700'}`}>
           {profilePic ? (
@@ -74,7 +74,7 @@ const VideoPlayer = memo(({ stream, name, profilePic, isMuted = false, isVideoOf
 
       <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 bg-slate-900/80 backdrop-blur-md pl-2 pr-3 py-1.5 rounded-lg text-[10px] md:text-xs font-medium border border-slate-700/50 text-white flex items-center gap-1.5 shadow-lg z-10">
         {isMuted ? <MicOff size={14} className="text-red-500" /> : <Mic size={14} className={isSpeaking ? "text-blue-400" : "text-emerald-500"} />}
-        <span className="truncate max-w-[100px] md:max-w-[150px]">{name}</span>
+        <span className="truncate max-w-[80px] sm:max-w-[120px] md:max-w-[150px]">{name}</span>
       </div>
     </div>
   );
@@ -922,7 +922,7 @@ export default function MeetingRoom() {
     return (
       <div
         onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
-        className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden"
+        className="min-h-screen bg-[#020617] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden"
       >
         <FloatingEmojiStyles />
 
@@ -981,7 +981,7 @@ export default function MeetingRoom() {
 
             {/* Left: Video Preview Section */}
             <div className="w-full flex flex-col justify-between h-full">
-              <div className="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-white/10 shadow-2xl group flex-1 min-h-[260px]">
+              <div className="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-white/10 shadow-2xl group flex-1 min-h-[200px] sm:min-h-[260px]">
                 <div className="absolute inset-0">
                   <VideoPlayer
                     stream={myStream}
@@ -997,11 +997,11 @@ export default function MeetingRoom() {
 
 
                 {/* Internal Overlay Controls */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4 z-30">
-                  <button onClick={toggleMute} className={`p-4 rounded-2xl transition-all duration-300 ${isMuted ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 md:gap-4 flex-wrap justify-center z-30">
+                  <button onClick={toggleMute} className={`p-3 sm:p-4 rounded-2xl transition-all duration-300 ${isMuted ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>
                     {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
                   </button>
-                  <button onClick={toggleVideo} className={`p-4 rounded-2xl transition-all duration-300 ${isVideoOff ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>
+                  <button onClick={toggleVideo} className={`p-3 sm:p-4 rounded-2xl transition-all duration-300 ${isVideoOff ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>
                     {isVideoOff ? <VideoOff size={20} /> : <VideoIcon size={20} />}
                   </button>
                 </div>
@@ -1073,7 +1073,7 @@ export default function MeetingRoom() {
         />
 
         {/* 🎯 CARD */}
-        <div className="relative w-full max-w-md p-8 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_70px_rgba(0,0,0,0.8)] text-center animate-in fade-in zoom-in duration-500">
+        <div className="relative w-full max-w-md w-full mx-4 p-8 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_70px_rgba(0,0,0,0.8)] text-center animate-in fade-in zoom-in duration-500">
 
           {/* 🔄 SPINNER */}
           <div className="relative flex justify-center mb-6">
@@ -1113,7 +1113,7 @@ export default function MeetingRoom() {
   return (
     <div
       onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
-      className="fixed inset-0 h-[100dvh] w-full text-white flex overflow-hidden font-sans bg-[#020617]"
+      className="fixed inset-0 h-[100dvh] w-full text-white flex flex-col md:flex-row overflow-hidden font-sans bg-[#020617]"
     >
 
 
@@ -1167,18 +1167,49 @@ export default function MeetingRoom() {
 
 
       {showSidebar && (
-        <div className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40" 
-        onClick={() => setShowSidebar(false)} 
+        <div className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+          onClick={() => setShowSidebar(false)}
         />
-      )
-    }
+      )}
+
+      {/* ✅ SIDEBAR (FINAL FIX) */}
+      {showSidebar && (
+        <div
+          className="
+      fixed top-0 right-0 h-full w-[90%] sm:w-[80%] max-w-[350px]
+      bg-slate-950 border-l border-slate-800
+      z-[999] flex flex-col
+    "
+        >
+          {/* CLOSE BUTTON */}
+          <div className="flex justify-end p-4">
+            <button onClick={() => setShowSidebar(false)}>
+              <X />
+            </button>
+          </div>
+
+          {/* TABS */}
+          <div className="flex gap-2 p-2 border-b border-white/10">
+            <button onClick={() => setActiveTab('chat')}>Chat</button>
+            <button onClick={() => setActiveTab('participants')}>People</button>
+            <button onClick={() => setActiveTab('notes')}>Notes</button>
+          </div>
+
+          {/* CONTENT */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {activeTab === 'chat' && <div>Chat UI</div>}
+            {activeTab === 'participants' && <div>Participants UI</div>}
+            {activeTab === 'notes' && <div>Notes UI</div>}
+          </div>
+        </div>
+      )}
 
 
 
 
 
       {/* ✅ KEEP THIS (Floating Emojis) */}
-      <div className="fixed inset-0 pointer-events-none z-[1000] overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none z-[1000] overflow-hidden px-2">
         {floatingEmojis.map(emoji => (
           <div
             key={emoji.id}
@@ -1481,7 +1512,11 @@ export default function MeetingRoom() {
       )}
 
 
-      <div className={`flex-1 flex flex-col p-2 md:p-4 relative transition-all duration-300 ${showSidebar ? 'md:mr-[350px]' : 'w-full'} h-full`}>
+      <div
+        className={
+          `flex-1 flex flex-col p-2 sm:p-3 md:p-4 relative transition-all duration-300 
+        ${showSidebar ? 'md:mr-[350px]' : 'w-full'} h-full min-w-0`
+        }>
 
         {toastNotification && (
           <div className="absolute top-4 right-4 md:top-8 md:right-8 bg-slate-800 border-l-4 border-blue-500 shadow-2xl px-4 py-3 rounded-lg z-50 flex flex-col animate-in slide-in-from-top-4 fade-in duration-300 max-w-xs">
@@ -1491,7 +1526,7 @@ export default function MeetingRoom() {
         )}
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-3 md:mb-5 px-3 md:px-4 z-10 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.6)] py-2 md:py-3">
+        <div className="flex flex-wrap justify-between items-center gap-2 mb-3 md:mb-5 px-3 md:px-4 z-10 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.6)] py-2 md:py-3">
 
           {/* 🧠 ROOM INFO */}
           <h2 className="text-sm md:text-xl font-bold tracking-tight flex items-center gap-3">
@@ -1625,7 +1660,13 @@ export default function MeetingRoom() {
             </div>
           ) : null}
 
-          <div className={`grid gap-2 md:gap-4 min-h-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${displayPinnedId ? 'grid-cols-3 md:grid-cols-1 w-full md:w-64 h-[25%] md:h-full flex-shrink-0 overflow-y-auto content-start auto-rows-[100px] md:auto-rows-[140px]' : `${getGridClasses(totalTiles)} w-full h-full flex-1`}`}>
+          <div
+            className={`grid min-h-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
+            ${displayPinnedId
+                ? 'grid-cols-3 md:grid-cols-1 w-full md:w-64 h-[25%] md:h-full flex-shrink-0 overflow-y-auto content-start auto-rows-[100px] md:auto-rows-[140px] gap-2 sm:gap-3 md:gap-4'
+                : `${getGridClasses(totalTiles)} auto-rows-[minmax(120px,1fr)] sm:auto-rows-[minmax(150px,1fr)] w-full h-full gap-2 sm:gap-3 md:gap-4`
+              }`}
+          >
             {activePeers.map(id => {
               if (id === displayPinnedId) return null;
               if (id === 'local-screen') {
@@ -1705,7 +1746,7 @@ export default function MeetingRoom() {
             {/* 🎤 MIC */}
             <button
               onClick={toggleMute}
-              className={`group p-3 md:p-4 rounded-full transition-all duration-300 shrink-0 
+              className={`group p-3 sm:p-4 md:p-4 rounded-full transition-all duration-300 shrink-0 
               transform hover:scale-110 active:scale-95
               ${isMuted
                   ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)]'
@@ -1842,477 +1883,482 @@ export default function MeetingRoom() {
         </div>
       </div>
 
-
-      <div
-        className={`
-        fixed top-0 right-0 h-full w-[85%] max-w-[350px]
-      bg-slate-950 border-l border-slate-800
+      {showSidebar && (
+        <div
+          className={`
+        fixed top-0 right-0 h-full w-[90%] sm:w-[80%] max-w-[350px]
+        bg-slate-950 border-l border-slate-800
         z-50 transform transition-transform duration-300
-
-        ${showSidebar ? 'translate-x-0' : 'translate-x-full'}
-
         md:translate-x-0 md:relative md:w-[350px]
         `}
-      >
+        >
+          {/* CLOSE BUTTON (MOBILE) */}
+          <div className="md:hidden flex justify-end p-4">
+            <button onClick={() => setShowSidebar(false)}>
+              <X />
+            </button>
+          </div>
 
-        {/* 🌊 Gradient Overlay */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-teal-400/10 to-emerald-500/10 blur-2xl"></div>
-        </div>
 
-        {/* HEADER */}
-        <div className="flex items-center justify-between p-3 border-b border-white/10 bg-white/5 backdrop-blur-xl">
+          {/* 🌊 Gradient Overlay */}
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-teal-400/10 to-emerald-500/10 blur-2xl"></div>
+          </div>
 
-          {/* Tabs */}
-          <div className="flex gap-1 w-full bg-white/5 p-1 rounded-xl border border-white/10 backdrop-blur-xl">
+          {/* HEADER */}
+          <div className="flex items-center justify-between p-3 border-b border-white/10 bg-white/5 backdrop-blur-xl">
 
-            <button
-              onClick={() => setActiveTab('chat')}
-              className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300
+            {/* Tabs */}
+            <div className="flex gap-1 w-full bg-white/5 p-1 rounded-xl border border-white/10 backdrop-blur-xl">
+
+              <button
+                onClick={() => setActiveTab('chat')}
+                className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300
         ${activeTab === 'chat'
-                  ? 'bg-gradient-to-r from-cyan-500 to-teal-400 text-white shadow-lg shadow-cyan-500/30'
-                  : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
-            >
-              Chat
-            </button>
+                    ? 'bg-gradient-to-r from-cyan-500 to-teal-400 text-white shadow-lg shadow-cyan-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
+              >
+                Chat
+              </button>
 
-            <button
-              onClick={() => setActiveTab('participants')}
-              className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300 relative
+              <button
+                onClick={() => setActiveTab('participants')}
+                className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300 relative
         ${activeTab === 'participants'
-                  ? 'bg-gradient-to-r from-cyan-500 to-teal-400 text-white shadow-lg shadow-cyan-500/30'
-                  : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
-            >
-              People ({Object.keys(peerNames).length + 1})
+                    ? 'bg-gradient-to-r from-cyan-500 to-teal-400 text-white shadow-lg shadow-cyan-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
+              >
+                People ({Object.keys(peerNames).length + 1})
 
-              {joinRequests.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] h-4 w-4 flex items-center justify-center rounded-full shadow-lg">
-                  {joinRequests.length}
-                </span>
-              )}
-            </button>
+                {joinRequests.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] h-4 w-4 flex items-center justify-center rounded-full shadow-lg">
+                    {joinRequests.length}
+                  </span>
+                )}
+              </button>
 
-            <button
-              onClick={() => setActiveTab('notes')}
-              className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300
+              <button
+                onClick={() => setActiveTab('notes')}
+                className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300
         ${activeTab === 'notes'
-                  ? 'bg-gradient-to-r from-cyan-500 to-teal-400 text-white shadow-lg shadow-cyan-500/30'
-                  : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
+                    ? 'bg-gradient-to-r from-cyan-500 to-teal-400 text-white shadow-lg shadow-cyan-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
+              >
+                Notes
+              </button>
+            </div>
+
+            {/* Close */}
+            <button
+              onClick={() => setShowSidebar(false)}
+              className="ml-3 text-slate-400 hover:text-white bg-white/5 border border-white/10 hover:bg-white/10 p-2 rounded-xl transition-all duration-300"
             >
-              Notes
+              <X size={18} />
             </button>
           </div>
 
-          {/* Close */}
-          <button
-            onClick={() => setShowSidebar(false)}
-            className="ml-3 text-slate-400 hover:text-white bg-white/5 border border-white/10 hover:bg-white/10 p-2 rounded-xl transition-all duration-300"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* ================= CHAT ================= */}
-        {activeTab === 'chat' && (
-          <div className="flex-1 flex flex-col bg-transparent min-h-0 overflow-hidden">
-            <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-6 custom-scrollbar">
-              {messages.length === 0 ? (
-                <div className="text-center flex flex-col items-center justify-center h-full text-slate-500">
-                  <div className="relative mb-4">
-                    <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-full animate-pulse" />
-                    <MessageSquare size={48} className="relative z-10 opacity-40 text-cyan-400" />
-                  </div>
-                  <p className="text-sm font-bold uppercase tracking-[0.2em] opacity-50">Secure_Channel_Empty</p>
-                </div>
-              ) : (
-                messages.map((m, i) => {
-                  const isMe = m.sender === userName;
-                  const isFile = m.text.startsWith('DATA_FILE:');
-
-                  // Logic to safely handle files without crashing
-                  let fileData: any = null;
-                  if (isFile) {
-                    try {
-                      // Crash Prevention: Slice string correctly before parsing
-                      const jsonString = m.text.substring(10);
-                      fileData = JSON.parse(jsonString);
-                    } catch (e) {
-                      console.error("File parse error", e);
-                    }
-                  }
-
-                  return (
-                    <div key={i} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full animate-in fade-in slide-in-from-bottom-2 duration-300`}>
-                      <div className={`flex items-center gap-2 mb-1.5 px-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${isMe ? 'text-cyan-400' : 'text-teal-400'}`}>
-                          {isMe ? 'You' : m.sender}
-                        </span>
-                        <span className="text-[8px] text-slate-600 font-mono">{m.time}</span>
-                      </div>
-
-                      <div
-                        className={`group relative p-3 text-sm break-words transition-all duration-300 shadow-2xl
-                ${isMe
-                            ? 'bg-gradient-to-br from-cyan-500 to-teal-500 text-black rounded-2xl rounded-tr-sm'
-                            : 'bg-white/5 border border-white/10 text-slate-200 rounded-2xl rounded-tl-sm backdrop-blur-xl'}`}
-                        style={{ maxWidth: '85%' }}
-                      >
-                        {isFile ? (
-                          fileData ? (
-                            <div className="space-y-2 min-w-[140px]">
-                              {fileData.type?.startsWith('image/') ? (
-                                <div className="relative rounded-lg overflow-hidden border border-black/10 max-h-64 bg-black/20">
-                                  <img
-                                    src={fileData.content}
-                                    alt="shared"
-                                    className="max-w-full h-auto object-contain mx-auto"
-                                    // Adding low-priority loading to prevent main thread block
-                                    loading="lazy"
-                                    onError={(e) => (e.currentTarget.style.display = 'none')}
-                                  />
-                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <a href={fileData.content} download={fileData.name} className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:scale-110 transition">
-                                      <Download size={18} />
-                                    </a>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-3 bg-black/20 p-3 rounded-lg border border-white/5">
-                                  <div className="p-2 bg-white/10 rounded-md"><FileText size={20} className={isMe ? "text-black" : "text-cyan-400"} /></div>
-                                  <div className="flex-1 overflow-hidden">
-                                    <p className="text-[10px] font-bold truncate">{fileData.name}</p>
-                                    <p className="text-[8px] opacity-60 uppercase">
-                                      {fileData.size ? (fileData.size / (1024 * 1024)).toFixed(2) : "0"} MB
-                                    </p>
-                                  </div>
-                                  <a href={fileData.content} download={fileData.name} className={`p-1.5 rounded-md hover:bg-white/10 transition-colors ${isMe ? "text-black" : "text-white"}`}>
-                                    <Download size={16} />
-                                  </a>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2 italic text-xs opacity-50">
-                              <Loader2 size={12} className="animate-spin" /> Processing Media...
-                            </div>
-                          )
-                        ) : (
-                          <p className="leading-relaxed font-medium">{m.text}</p>
-                        )}
-                      </div>
+          {/* ================= CHAT ================= */}
+          {activeTab === 'chat' && (
+            <div className="flex-1 flex flex-col bg-transparent min-h-0 min-w-0 overflow-hidden">
+              <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-6 custom-scrollbar">
+                {messages.length === 0 ? (
+                  <div className="text-center flex flex-col items-center justify-center h-full text-slate-500">
+                    <div className="relative mb-4">
+                      <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-full animate-pulse" />
+                      <MessageSquare size={48} className="relative z-10 opacity-40 text-cyan-400" />
                     </div>
-                  );
-                })
-              )}
-              <div ref={messagesEndRef} className="h-2" />
-            </div>
-
-            {/* INPUT SECTION */}
-            <div className="p-4 border-t border-white/10 bg-white/5 backdrop-blur-2xl">
-              <form onSubmit={sendMessage} className="flex gap-2 items-center bg-black/40 border border-white/10 rounded-2xl p-1.5 pr-2 focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all">
-
-                <label className="p-2.5 text-slate-500 hover:text-cyan-400 cursor-pointer transition-colors hover:bg-white/5 rounded-xl">
-                  <Plus size={20} />
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*,application/pdf,.doc,.docx"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        // i. 100MB Limit
-                        if (file.size > 100 * 1024 * 1024) return alert("File too large! Max 100MB allowed.");
-
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                          try {
-                            const payload = {
-                              name: file.name,
-                              type: file.type,
-                              size: file.size,
-                              content: reader.result // This is the heavy part
-                            };
-
-                            // Emit data string directly
-                            socket?.emit('send-message', {
-                              roomId,
-                              text: `DATA_FILE:${JSON.stringify(payload)}`,
-                              sender: userName
-                            });
-                          } catch (err) {
-                            console.error("Memory Buffer Overflow", err);
-                            alert("System Memory full. Try a smaller file.");
-                          }
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                      e.target.value = ''; // Reset input to allow same file again
-                    }}
-                  />
-                </label>
-
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={handleTyping}
-                  placeholder="Send matrix log..."
-                  className="flex-1 bg-transparent px-2 py-3 text-sm text-white placeholder-slate-600 outline-none font-mono"
-                />
-
-                <button
-                  type="submit"
-                  disabled={!chatInput.trim()}
-                  className="bg-gradient-to-r from-cyan-500 to-teal-400 disabled:opacity-30 p-3 rounded-xl text-black hover:scale-105 active:scale-95 transition-all shadow-lg"
-                >
-                  <Send size={18} />
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* ================= NOTES & TASKS ================= */}
-        {activeTab === 'notes' && (
-          <div className="flex-1 flex flex-col p-4 space-y-6 overflow-y-auto custom-scrollbar pb-20">
-
-            {/* 📝 SHARED NOTES SECTION */}
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-center justify-between px-1">
-                <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.4em] flex items-center gap-2">
-                  <FileText size={14} /> Meeting Registry
-                </h4>
-                <span className="text-[8px] text-slate-500 font-mono uppercase tracking-widest">Live_Sync</span>
-              </div>
-
-              <textarea
-                value={sharedNotes}
-                onChange={handleNotesChange}
-                placeholder="Type workspace logs here..."
-                className="w-full h-48 bg-black/40 border border-white/10 rounded-[1.5rem] p-4 text-sm text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono resize-none shadow-inner"
-              />
-              <p className="text-[9px] text-slate-500 italic px-2">Neural synchronization active for all nodes.</p>
-            </div>
-
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-2"></div>
-
-            {/* ✅ ACTION ITEMS SECTION */}
-            <div className="flex flex-col flex-1 space-y-4">
-              <h4 className="text-[10px] font-black text-purple-400 uppercase tracking-[0.4em] flex items-center gap-2 px-1">
-                <CheckSquare size={14} /> Objective Board
-              </h4>
-
-              {/* TASK INPUT FORM */}
-              <form onSubmit={handleAddTask} className="space-y-3">
-                <div className="flex gap-2 group/input">
-                  <input
-                    type="text"
-                    value={newTaskInput}
-                    onChange={(e) => setNewTaskInput(e.target.value)}
-                    placeholder="Initialize new task..."
-                    className="flex-1 bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all placeholder:text-slate-600"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!newTaskInput.trim()}
-                    className="bg-gradient-to-r from-purple-500 to-indigo-600 p-3 rounded-xl text-white shadow-lg shadow-purple-500/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-30"
-                  >
-                    <Plus size={20} />
-                  </button>
-                </div>
-
-                <div className="relative">
-                  <select
-                    value={selectedAssignee}
-                    onChange={(e) => setSelectedAssignee(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[11px] text-slate-300 outline-none appearance-none focus:border-purple-500/50 transition-all"
-                  >
-                    <option value="unassigned">Assign to (Optional)</option>
-                    <option value="local">{userName} (You)</option>
-                    {Object.keys(peerNames).map(id => (
-                      <option key={id} value={id}>{peerNames[id]}</option>
-                    ))}
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                    <ChevronDown size={14} />
-                  </div>
-                </div>
-              </form>
-
-              {/* TASK LIST DISPLAY */}
-              <div className="space-y-3 mt-2">
-                {meetingTasks.length === 0 ? (
-                  <div className="py-10 text-center border-2 border-dashed border-white/5 rounded-[2rem] opacity-30">
-                    <CheckSquare size={32} className="mx-auto mb-2 text-slate-600" />
-                    <p className="text-[10px] font-bold uppercase tracking-widest">No active objectives</p>
+                    <p className="text-sm font-bold uppercase tracking-[0.2em] opacity-50">Secure_Channel_Empty</p>
                   </div>
                 ) : (
-                  meetingTasks.slice().reverse().map((task) => {
-                    {/* LOGIC: Resolving the @Unknown name issue */ }
-                    const displayName = task.assigneeId === userIdStore || task.assigneeId === 'local'
-                      ? 'You'
-                      : (task.assigneeName && task.assigneeName !== 'Unknown'
-                        ? task.assigneeName
-                        : (peerNames[task.assigneeId || ''] || 'Participant'));
+                  messages.map((m, i) => {
+                    const isMe = m.sender === userName;
+                    const isFile = m.text.startsWith('DATA_FILE:');
+
+                    // Logic to safely handle files without crashing
+                    let fileData: any = null;
+                    if (isFile) {
+                      try {
+                        // Crash Prevention: Slice string correctly before parsing
+                        const jsonString = m.text.substring(10);
+                        fileData = JSON.parse(jsonString);
+                      } catch (e) {
+                        console.error("File parse error", e);
+                      }
+                    }
 
                     return (
-                      <div
-                        key={task.id}
-                        className="group bg-white/[0.03] border border-white/10 p-4 rounded-2xl backdrop-blur-xl hover:border-purple-500/30 transition-all duration-300 shadow-xl relative overflow-hidden"
-                      >
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      <div key={i} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+                        <div className={`flex items-center gap-2 mb-1.5 px-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${isMe ? 'text-cyan-400' : 'text-teal-400'}`}>
+                            {isMe ? 'You' : m.sender}
+                          </span>
+                          <span className="text-[8px] text-slate-600 font-mono">{m.time}</span>
+                        </div>
 
-                        <div className="flex flex-col gap-3">
-                          <div className="flex justify-between items-start gap-4">
-                            <p className="text-sm text-slate-200 font-medium leading-relaxed">{task.text}</p>
-
-                            <div className="flex-shrink-0">
-                              <span className="text-[9px] font-black uppercase tracking-widest bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-1 rounded-md shadow-[0_0_10px_rgba(168,85,247,0.1)]">
-                                @{displayName}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                            <span className="text-[9px] text-slate-500 uppercase tracking-tighter">
-                              Origin: <span className="text-slate-400">{task.creator === userName ? 'You' : task.creator}</span>
-                            </span>
-                            <span className="text-[8px] font-mono text-slate-600">ID_{task.id.slice(-4)}</span>
-                          </div>
+                        <div
+                          className={`group relative p-3 text-sm break-words transition-all duration-300 shadow-2xl
+                ${isMe
+                              ? 'bg-gradient-to-br from-cyan-500 to-teal-500 text-black rounded-2xl rounded-tr-sm'
+                              : 'bg-white/5 border border-white/10 text-slate-200 rounded-2xl rounded-tl-sm backdrop-blur-xl'}`}
+                          style={{ maxWidth: '85%' }}
+                        >
+                          {isFile ? (
+                            fileData ? (
+                              <div className="space-y-2 min-w-[140px]">
+                                {fileData.type?.startsWith('image/') ? (
+                                  <div className="relative rounded-lg overflow-hidden border border-black/10 max-h-64 bg-black/20">
+                                    <img
+                                      src={fileData.content}
+                                      alt="shared"
+                                      className="max-w-full h-auto object-contain mx-auto"
+                                      // Adding low-priority loading to prevent main thread block
+                                      loading="lazy"
+                                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                      <a href={fileData.content} download={fileData.name} className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:scale-110 transition">
+                                        <Download size={18} />
+                                      </a>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-3 bg-black/20 p-3 rounded-lg border border-white/5">
+                                    <div className="p-2 bg-white/10 rounded-md"><FileText size={20} className={isMe ? "text-black" : "text-cyan-400"} /></div>
+                                    <div className="flex-1 overflow-hidden">
+                                      <p className="text-[10px] font-bold truncate">{fileData.name}</p>
+                                      <p className="text-[8px] opacity-60 uppercase">
+                                        {fileData.size ? (fileData.size / (1024 * 1024)).toFixed(2) : "0"} MB
+                                      </p>
+                                    </div>
+                                    <a href={fileData.content} download={fileData.name} className={`p-1.5 rounded-md hover:bg-white/10 transition-colors ${isMe ? "text-black" : "text-white"}`}>
+                                      <Download size={16} />
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 italic text-xs opacity-50">
+                                <Loader2 size={12} className="animate-spin" /> Processing Media...
+                              </div>
+                            )
+                          ) : (
+                            <p className="leading-relaxed font-medium">{m.text}</p>
+                          )}
                         </div>
                       </div>
                     );
                   })
                 )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ================= PARTICIPANTS ================= */}
-        {activeTab === 'participants' && (
-          <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
-
-            {/* 1. WAITING ROOM (Host only) */}
-            {(myRole === 'creator' || myRole === 'co-host') && joinRequests.length > 0 && (
-              <div className="mb-6">
-                <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em] mb-3 px-1 flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-                  Waiting Room ({joinRequests.length})
-                </h4>
-                {joinRequests.map(req => (
-                  <div key={req.socketId} className="bg-white/5 border border-amber-500/20 p-3 rounded-xl mb-2 flex justify-between items-center backdrop-blur-xl">
-                    <span className="text-sm font-bold text-slate-200 truncate pr-2">{req.userName}</span>
-                    <div className="flex gap-1.5">
-                      <button onClick={() => { socket?.emit('accept-join', { targetSocketId: req.socketId, targetUserId: req.targetUserId, roomId }); setJoinRequests(prev => prev.filter(r => r.socketId !== req.socketId)); }} className="bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white p-1.5 rounded-lg transition-all"><Check size={16} /></button>
-                      <button onClick={() => { socket?.emit('reject-join', { targetSocketId: req.socketId }); setJoinRequests(prev => prev.filter(r => r.socketId !== req.socketId)); }} className="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white p-1.5 rounded-lg transition-all"><X size={16} /></button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.2em] mb-3 px-1">
-              In Meeting
-            </h4>
-
-            <div className="space-y-2">
-              {/* 2. LOCAL USER (YOU) - CLICKABLE FIXED */}
-              <div className="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/20 shadow-lg group">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)] flex-shrink-0">
-                    {userProfilePic
-                      ? <img src={userProfilePic} className="h-full w-full object-cover" alt="You" />
-                      : <div className="flex items-center justify-center h-full bg-slate-800 font-bold text-cyan-400">{userName.charAt(0)}</div>
-                    }
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm font-bold text-white truncate">{userName} (You)</span>
-                    <span className="text-[9px] text-cyan-400 font-black uppercase tracking-tighter">{myRole === 'creator' ? 'Host' : myRole}</span>
-                  </div>
-                </div>
-
-                {/* MEDIA CONTROLS FOR SELF */}
-                <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                  <button
-                    onClick={toggleMute}
-                    className={`p-1.5 rounded-lg transition-all ${isMuted ? 'bg-rose-500/20 text-rose-500' : 'hover:bg-white/10 text-emerald-500'}`}
-                    title={isMuted ? "Unmute" : "Mute"}
-                  >
-                    {isMuted ? <MicOff size={16} /> : <Mic size={16} />}
-                  </button>
-
-                  <button
-                    onClick={toggleVideo}
-                    className={`p-1.5 rounded-lg transition-all ${isVideoOff ? 'bg-rose-500/20 text-rose-500' : 'hover:bg-white/10 text-cyan-400'}`}
-                    title={isVideoOff ? "Start Video" : "Stop Video"}
-                  >
-                    {isVideoOff ? <VideoOff size={16} /> : <VideoIcon size={16} />}
-                  </button>
-
-                  <div className="w-px h-4 bg-white/10 mx-0.5" />
-
-                  <button
-                    onClick={() => setPinnedUserId(pinnedUserId === 'local' ? null : 'local')}
-                    className={`p-1.5 rounded-lg transition-all ${pinnedUserId === 'local' ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-500 hover:text-white'}`}
-                  >
-                    <Pin size={16} />
-                  </button>
-                </div>
+                <div ref={messagesEndRef} className="h-2" />
               </div>
 
-              {/* 3. REMOTE PARTICIPANTS (Indicators only as we can't force-mute others without extra socket logic) */}
-              {sortedPeerIds.map(id => {
-                const role = roomRoles[id] || 'guest';
-                const isTargetCreator = role === 'creator';
-                const canToggleCoHost = myRole === 'creator' && !isTargetCreator;
-                const canKick = (myRole === 'creator' && !isTargetCreator) || (myRole === 'co-host' && role === 'guest');
+              {/* INPUT SECTION */}
+              <div className="p-4 border-t border-white/10 bg-white/5 backdrop-blur-2xl">
+                <form onSubmit={sendMessage} className="flex gap-2 items-center bg-black/40 border border-white/10 rounded-2xl p-1.5 pr-2 focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all">
 
-                return (
-                  <div key={id} className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-300 ${speakingPeers[id] ? 'bg-cyan-500/5 border-cyan-500/30' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}>
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={`relative h-10 w-10 rounded-full overflow-hidden border flex-shrink-0 transition-all ${speakingPeers[id] ? 'border-cyan-400 animate-pulse' : 'border-white/10'}`}>
-                        {peerPics[id]
-                          ? <img src={peerPics[id]} className="h-full w-full object-cover" alt="User" />
-                          : <div className="flex items-center justify-center h-full bg-slate-800 font-bold text-slate-400">{peerNames[id]?.charAt(0)}</div>
+                  <label className="p-2.5 text-slate-500 hover:text-cyan-400 cursor-pointer transition-colors hover:bg-white/5 rounded-xl">
+                    <Plus size={20} />
+                    <input
+                      type="file"
+                      className="hidden w-full min-w-0"
+                      accept="image/*,application/pdf,.doc,.docx"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          // i. 100MB Limit
+                          if (file.size > 100 * 1024 * 1024) return alert("File too large! Max 100MB allowed.");
+
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            try {
+                              const payload = {
+                                name: file.name,
+                                type: file.type,
+                                size: file.size,
+                                content: reader.result // This is the heavy part
+                              };
+
+                              // Emit data string directly
+                              socket?.emit('send-message', {
+                                roomId,
+                                text: `DATA_FILE:${JSON.stringify(payload)}`,
+                                sender: userName
+                              });
+                            } catch (err) {
+                              console.error("Memory Buffer Overflow", err);
+                              alert("System Memory full. Try a smaller file.");
+                            }
+                          };
+                          reader.readAsDataURL(file);
                         }
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className={`text-sm font-medium truncate ${speakingPeers[id] ? 'text-cyan-300' : 'text-slate-200'}`}>{peerNames[id]}</span>
-                        {role !== 'guest' && <span className={`text-[9px] font-black uppercase tracking-tighter ${role === 'creator' ? 'text-blue-400' : 'text-amber-400'}`}>{role}</span>}
-                      </div>
-                    </div>
+                        e.target.value = ''; // Reset input to allow same file again
+                      }}
+                    />
+                  </label>
 
-                    <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                      {/* Visual indicators for others */}
-                      <div className="p-1.5">
-                        {peerStatus[id]?.isMuted ? <MicOff size={16} className="text-rose-500/70" /> : <Mic size={16} className="text-emerald-500/70" />}
-                      </div>
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={handleTyping}
+                    placeholder="Send matrix log..."
+                    className="flex-1 bg-transparent px-2 sm:px-3 py-3 text-sm text-white placeholder-slate-600 outline-none font-mono w-full min-w-0"
+                  />
 
-                      <div className="w-px h-4 bg-white/10 mx-1" />
+                  <button
+                    type="submit"
+                    disabled={!chatInput.trim()}
+                    className="bg-gradient-to-r from-cyan-500 to-teal-400 disabled:opacity-30 p-3 rounded-xl text-black hover:scale-105 active:scale-95 transition-all shadow-lg"
+                  >
+                    <Send size={18} />
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
 
-                      <button onClick={() => setPinnedUserId(pinnedUserId === id ? null : id)} className={`p-1.5 rounded-lg transition-all ${pinnedUserId === id ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-500 hover:text-white'}`}>
-                        <Pin size={16} />
-                      </button>
+          {/* ================= NOTES & TASKS ================= */}
+          {activeTab === 'notes' && (
+            <div className="flex-1 flex flex-col p-4 space-y-6 overflow-y-auto custom-scrollbar pb-20">
 
-                      {canToggleCoHost && (
-                        <button onClick={() => socket?.emit(role === 'co-host' ? 'remove-cohost' : 'make-cohost', { targetSocketId: id, roomId })} className="p-1.5 text-slate-500 hover:text-amber-400 transition-all" title="Toggle Co-Host">
-                          <Star size={16} />
-                        </button>
-                      )}
-                      {canKick && (
-                        <button onClick={() => socket?.emit('kick-user', { targetSocketId: id, targetUserId: id, roomId })} className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-md transition-all">
-                          <UserMinus size={16} />
-                        </button>
-                      )}
+              {/* 📝 SHARED NOTES SECTION */}
+              <div className="flex flex-col space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.4em] flex items-center gap-2">
+                    <FileText size={14} /> Meeting Registry
+                  </h4>
+                  <span className="text-[8px] text-slate-500 font-mono uppercase tracking-widest">Live_Sync</span>
+                </div>
+
+                <textarea
+                  value={sharedNotes}
+                  onChange={handleNotesChange}
+                  placeholder="Type workspace logs here..."
+                  className="w-full h-48 bg-black/40 border border-white/10 rounded-[1.5rem] p-4 text-sm text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono resize-none shadow-inner"
+                />
+                <p className="text-[9px] text-slate-500 italic px-2">Neural synchronization active for all nodes.</p>
+              </div>
+
+              <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-2"></div>
+
+              {/* ✅ ACTION ITEMS SECTION */}
+              <div className="flex flex-col flex-1 space-y-4">
+                <h4 className="text-[10px] font-black text-purple-400 uppercase tracking-[0.4em] flex items-center gap-2 px-1">
+                  <CheckSquare size={14} /> Objective Board
+                </h4>
+
+                {/* TASK INPUT FORM */}
+                <form onSubmit={handleAddTask} className="space-y-3">
+                  <div className="flex gap-2 group/input">
+                    <input
+                      type="text"
+                      value={newTaskInput}
+                      onChange={(e) => setNewTaskInput(e.target.value)}
+                      placeholder="Initialize new task..."
+                      className="flex-1 bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all placeholder:text-slate-600 w-full min-w-0"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!newTaskInput.trim()}
+                      className="bg-gradient-to-r from-purple-500 to-indigo-600 p-3 rounded-xl text-white shadow-lg shadow-purple-500/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-30"
+                    >
+                      <Plus size={20} />
+                    </button>
+                  </div>
+
+                  <div className="relative">
+                    <select
+                      value={selectedAssignee}
+                      onChange={(e) => setSelectedAssignee(e.target.value)}
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[11px] text-slate-300 outline-none appearance-none focus:border-purple-500/50 transition-all"
+                    >
+                      <option value="unassigned">Assign to (Optional)</option>
+                      <option value="local">{userName} (You)</option>
+                      {Object.keys(peerNames).map(id => (
+                        <option key={id} value={id}>{peerNames[id]}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                      <ChevronDown size={14} />
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+                </form>
 
-      </div>
+                {/* TASK LIST DISPLAY */}
+                <div className="space-y-3 mt-2">
+                  {meetingTasks.length === 0 ? (
+                    <div className="py-10 text-center border-2 border-dashed border-white/5 rounded-[2rem] opacity-30">
+                      <CheckSquare size={32} className="mx-auto mb-2 text-slate-600" />
+                      <p className="text-[10px] font-bold uppercase tracking-widest">No active objectives</p>
+                    </div>
+                  ) : (
+                    meetingTasks.slice().reverse().map((task) => {
+                      {/* LOGIC: Resolving the @Unknown name issue */ }
+                      const displayName = task.assigneeId === userIdStore || task.assigneeId === 'local'
+                        ? 'You'
+                        : (task.assigneeName && task.assigneeName !== 'Unknown'
+                          ? task.assigneeName
+                          : (peerNames[task.assigneeId || ''] || 'Participant'));
+
+                      return (
+                        <div
+                          key={task.id}
+                          className="group bg-white/[0.03] border border-white/10 p-4 rounded-2xl backdrop-blur-xl hover:border-purple-500/30 transition-all duration-300 shadow-xl relative overflow-hidden"
+                        >
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                          <div className="flex flex-col gap-3">
+                            <div className="flex justify-between items-start gap-4">
+                              <p className="text-sm text-slate-200 font-medium leading-relaxed">{task.text}</p>
+
+                              <div className="flex-shrink-0">
+                                <span className="text-[9px] font-black uppercase tracking-widest bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-1 rounded-md shadow-[0_0_10px_rgba(168,85,247,0.1)]">
+                                  @{displayName}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                              <span className="text-[9px] text-slate-500 uppercase tracking-tighter">
+                                Origin: <span className="text-slate-400">{task.creator === userName ? 'You' : task.creator}</span>
+                              </span>
+                              <span className="text-[8px] font-mono text-slate-600">ID_{task.id.slice(-4)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================= PARTICIPANTS ================= */}
+          {activeTab === 'participants' && (
+            <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
+
+              {/* 1. WAITING ROOM (Host only) */}
+              {(myRole === 'creator' || myRole === 'co-host') && joinRequests.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em] mb-3 px-1 flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    Waiting Room ({joinRequests.length})
+                  </h4>
+                  {joinRequests.map(req => (
+                    <div key={req.socketId} className="bg-white/5 border border-amber-500/20 p-3 rounded-xl mb-2 flex justify-between items-center backdrop-blur-xl">
+                      <span className="text-sm font-bold text-slate-200 truncate pr-2">{req.userName}</span>
+                      <div className="flex gap-1.5">
+                        <button onClick={() => { socket?.emit('accept-join', { targetSocketId: req.socketId, targetUserId: req.targetUserId, roomId }); setJoinRequests(prev => prev.filter(r => r.socketId !== req.socketId)); }} className="bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white p-1.5 rounded-lg transition-all"><Check size={16} /></button>
+                        <button onClick={() => { socket?.emit('reject-join', { targetSocketId: req.socketId }); setJoinRequests(prev => prev.filter(r => r.socketId !== req.socketId)); }} className="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white p-1.5 rounded-lg transition-all"><X size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.2em] mb-3 px-1">
+                In Meeting
+              </h4>
+
+              <div className="space-y-2">
+                {/* 2. LOCAL USER (YOU) - CLICKABLE FIXED */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/20 shadow-lg group">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)] flex-shrink-0">
+                      {userProfilePic
+                        ? <img src={userProfilePic} className="h-full w-full object-cover" alt="You" />
+                        : <div className="flex items-center justify-center h-full bg-slate-800 font-bold text-cyan-400">{userName.charAt(0)}</div>
+                      }
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-sm font-bold text-white truncate">{userName} (You)</span>
+                      <span className="text-[9px] text-cyan-400 font-black uppercase tracking-tighter">{myRole === 'creator' ? 'Host' : myRole}</span>
+                    </div>
+                  </div>
+
+                  {/* MEDIA CONTROLS FOR SELF */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                    <button
+                      onClick={toggleMute}
+                      className={`p-1.5 rounded-lg transition-all ${isMuted ? 'bg-rose-500/20 text-rose-500' : 'hover:bg-white/10 text-emerald-500'}`}
+                      title={isMuted ? "Unmute" : "Mute"}
+                    >
+                      {isMuted ? <MicOff size={16} /> : <Mic size={16} />}
+                    </button>
+
+                    <button
+                      onClick={toggleVideo}
+                      className={`p-1.5 rounded-lg transition-all ${isVideoOff ? 'bg-rose-500/20 text-rose-500' : 'hover:bg-white/10 text-cyan-400'}`}
+                      title={isVideoOff ? "Start Video" : "Stop Video"}
+                    >
+                      {isVideoOff ? <VideoOff size={16} /> : <VideoIcon size={16} />}
+                    </button>
+
+                    <div className="w-px h-4 bg-white/10 mx-0.5" />
+
+                    <button
+                      onClick={() => setPinnedUserId(pinnedUserId === 'local' ? null : 'local')}
+                      className={`p-1.5 rounded-lg transition-all ${pinnedUserId === 'local' ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-500 hover:text-white'}`}
+                    >
+                      <Pin size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3. REMOTE PARTICIPANTS (Indicators only as we can't force-mute others without extra socket logic) */}
+                {sortedPeerIds.map(id => {
+                  const role = roomRoles[id] || 'guest';
+                  const isTargetCreator = role === 'creator';
+                  const canToggleCoHost = myRole === 'creator' && !isTargetCreator;
+                  const canKick = (myRole === 'creator' && !isTargetCreator) || (myRole === 'co-host' && role === 'guest');
+
+                  return (
+                    <div key={id} className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-300 ${speakingPeers[id] ? 'bg-cyan-500/5 border-cyan-500/30' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`relative h-10 w-10 rounded-full overflow-hidden border flex-shrink-0 transition-all ${speakingPeers[id] ? 'border-cyan-400 animate-pulse' : 'border-white/10'}`}>
+                          {peerPics[id]
+                            ? <img src={peerPics[id]} className="h-full w-full object-cover" alt="User" />
+                            : <div className="flex items-center justify-center h-full bg-slate-800 font-bold text-slate-400">{peerNames[id]?.charAt(0)}</div>
+                          }
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className={`text-sm font-medium truncate ${speakingPeers[id] ? 'text-cyan-300' : 'text-slate-200'}`}>{peerNames[id]}</span>
+                          {role !== 'guest' && <span className={`text-[9px] font-black uppercase tracking-tighter ${role === 'creator' ? 'text-blue-400' : 'text-amber-400'}`}>{role}</span>}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                        {/* Visual indicators for others */}
+                        <div className="p-1.5">
+                          {peerStatus[id]?.isMuted ? <MicOff size={16} className="text-rose-500/70" /> : <Mic size={16} className="text-emerald-500/70" />}
+                        </div>
+
+                        <div className="w-px h-4 bg-white/10 mx-1" />
+
+                        <button onClick={() => setPinnedUserId(pinnedUserId === id ? null : id)} className={`p-1.5 rounded-lg transition-all ${pinnedUserId === id ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-500 hover:text-white'}`}>
+                          <Pin size={16} />
+                        </button>
+
+                        {canToggleCoHost && (
+                          <button onClick={() => socket?.emit(role === 'co-host' ? 'remove-cohost' : 'make-cohost', { targetSocketId: id, roomId })} className="p-1.5 text-slate-500 hover:text-amber-400 transition-all" title="Toggle Co-Host">
+                            <Star size={16} />
+                          </button>
+                        )}
+                        {canKick && (
+                          <button onClick={() => socket?.emit('kick-user', { targetSocketId: id, targetUserId: id, roomId })} className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-md transition-all">
+                            <UserMinus size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+        </div>
+      )}
 
 
 

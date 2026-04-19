@@ -13,7 +13,6 @@ export default function ResetPassword() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // 🔥 comet
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [trailPoints, setTrailPoints] = useState<{ x: number; y: number }[]>([]);
 
@@ -52,7 +51,7 @@ export default function ResetPassword() {
     <div
       onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
       onMouseLeave={() => setMouse({ x: -9999, y: -9999 })}
-      className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden"
+      className="min-h-screen bg-[#020617] flex items-center justify-center px-4 sm:px-6 py-6 relative overflow-hidden"
     >
 
       {/* Background */}
@@ -60,9 +59,9 @@ export default function ResetPassword() {
 
       <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
-      {/* Glow blobs */}
-      <div className="absolute w-[400px] h-[400px] bg-cyan-400/20 blur-3xl rounded-full top-[-100px] left-[-100px]"></div>
-      <div className="absolute w-[400px] h-[400px] bg-emerald-400/20 blur-3xl rounded-full bottom-[-100px] right-[-100px]"></div>
+      {/* Glow blobs (fixed) */}
+      <div className="absolute w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-cyan-400/20 blur-3xl rounded-full top-[-80px] left-[-80px]"></div>
+      <div className="absolute w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-emerald-400/20 blur-3xl rounded-full bottom-[-80px] right-[-80px]"></div>
 
       {/* Comet */}
       {trailPoints.map((p, i) => (
@@ -83,59 +82,57 @@ export default function ResetPassword() {
       ))}
 
       {/* Card */}
-      <div className="relative z-10 w-full max-w-md p-7 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
+      <div className="relative z-10 w-full max-w-md sm:max-w-lg p-5 sm:p-7 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
 
-        {/* Header */}
-        <div className="flex flex-col items-center mb-7">
+        <div className="flex flex-col items-center mb-6 sm:mb-7">
           <div className="bg-gradient-to-br from-teal-500 to-cyan-500 p-3 rounded-2xl shadow-lg shadow-cyan-500/30">
-            <ShieldCheck className="text-white" size={28} />
+            <ShieldCheck className="text-white" size={24} />
           </div>
 
-          <h2 className="mt-6 text-2xl font-semibold tracking-[0.2em] text-center">
+          <h2 className="mt-5 sm:mt-6 text-lg sm:text-2xl font-semibold tracking-[0.15em] sm:tracking-[0.2em] text-center">
             <span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent animate-[flicker_2.5s_infinite]">
               SET NEW PASSWORD
             </span>
           </h2>
 
-          <div className="mt-3 w-24 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-70 blur-[0.5px]" />
+          <div className="mt-3 w-20 sm:w-24 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-70 blur-[0.5px]" />
 
-          <p className="text-slate-400 text-sm text-center mt-3">
+          <p className="text-slate-400 text-xs sm:text-sm text-center mt-3">
             Your new password must be at least 6 characters.
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg mb-5 text-sm text-center">
+          <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-2 sm:p-3 rounded-lg mb-4 sm:mb-5 text-xs sm:text-sm text-center">
             {error}
           </div>
         )}
 
         {message ? (
           <div className="text-center space-y-4 animate-[fadeInUp_0.5s_ease]">
-            <div className="bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 p-4 rounded-xl text-sm">
+            <div className="bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 p-3 sm:p-4 rounded-xl text-xs sm:text-sm">
               {message}
             </div>
-            <p className="text-slate-400 text-sm">Redirecting to login...</p>
-            <Link to="/" className="text-cyan-400 hover:text-cyan-300">Go to Login</Link>
+            <p className="text-slate-400 text-xs sm:text-sm">Redirecting to login...</p>
+            <Link to="/" className="text-cyan-400 hover:text-cyan-300 text-sm">Go to Login</Link>
           </div>
         ) : (
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
 
-            {/* Password */}
             <div>
-              <label className="block text-slate-400 text-sm mb-1.5">New Password</label>
+              <label className="block text-slate-400 text-xs sm:text-sm mb-1.5">New Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
 
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-white
+                  className="w-full pl-10 pr-10 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm
                   placeholder:text-slate-500 outline-none transition-all duration-300 ease-out
-                  hover:scale-[1.02] focus:scale-[1.03]
+                  sm:hover:scale-[1.02] sm:focus:scale-[1.03]
                   focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20
                   focus:shadow-[0_0_15px_rgba(34,211,238,0.25)]"
                   required
@@ -146,24 +143,23 @@ export default function ResetPassword() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-cyan-400"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
-            {/* Confirm Password */}
             <div>
-              <label className="block text-slate-400 text-sm mb-1.5">Confirm Password</label>
+              <label className="block text-slate-400 text-xs sm:text-sm mb-1.5">Confirm Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 py-3 bg-white/5 border border-white/10 rounded-xl text-white
+                  className="w-full pl-10 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm
                   placeholder:text-slate-500 outline-none transition-all duration-300 ease-out
-                  hover:scale-[1.02] focus:scale-[1.03]
+                  sm:hover:scale-[1.02] sm:focus:scale-[1.03]
                   focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20
                   focus:shadow-[0_0_15px_rgba(34,211,238,0.25)]"
                   required
@@ -171,13 +167,12 @@ export default function ResetPassword() {
               </div>
             </div>
 
-            {/* Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white py-3.5 rounded-xl
-              hover:scale-[1.04] active:scale-[0.96]
-              shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/60 transition-all"
+              className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white py-2.5 sm:py-3.5 rounded-xl
+              sm:hover:scale-[1.04] active:scale-[0.96]
+              shadow-lg shadow-cyan-500/30 sm:hover:shadow-cyan-500/60 transition-all"
             >
               {isLoading ? <Loader2 className="animate-spin mx-auto" /> : "Save Password"}
             </button>
