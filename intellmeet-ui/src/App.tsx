@@ -238,8 +238,7 @@ const Dashboard = () => {
   }, [activeTab]);
 
   useEffect(() => {
-    if ((activeTab === 'schedule' || activeTab === 'history' || activeTab === 'tasks' || activeTab === 'analytics') && token) {
-      if (scheduledMeetings.length > 0) return;
+    if ((activeTab === 'home' || activeTab === 'schedule' || activeTab === 'history' || activeTab === 'tasks' || activeTab === 'analytics') && token) {
       const fetchMeetings = async () => {
         setIsLoadingMeetings(true);
         try {
@@ -250,7 +249,7 @@ const Dashboard = () => {
       };
       fetchMeetings();
     }
-  }, [activeTab, token, API_URL, logout, scheduledMeetings.length]);
+  }, [activeTab, token, API_URL, logout]);
 
   const handleJoin = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -452,6 +451,14 @@ const Dashboard = () => {
   const activeIndex = tabList.indexOf(activeTab);
   const filterList = ['all', 'completed', 'expired'] as const;
   const activeFilterIndex = filterList.indexOf(historyFilter);
+
+  // Stats for Home Dashboard
+  const stats = [
+    { label: "Meetings", value: scheduledMeetings.length.toString(), icon: Video, color: "text-cyan-400", bg: "bg-cyan-500/10" },
+    { label: "Hours", value: `${scheduledMeetings.filter(m => m.status === 'Completed').length}h`, icon: Clock, color: "text-purple-400", bg: "bg-purple-500/10" },
+    { label: "Tasks", value: allTasks.length.toString(), icon: CheckSquare, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+    { label: "Efficiency", value: `${allTasks.length > 0 ? Math.round((doneTasksCount / allTasks.length) * 100) : 0}%`, icon: TrendingUp, color: "text-amber-400", bg: "bg-amber-500/10" },
+  ];
 
   return (
     <div className="min-h-[100dvh] bg-[#020617] text-white flex flex-col md:flex-row font-sans relative overflow-hidden">
@@ -682,16 +689,10 @@ const Dashboard = () => {
                     </div>
                     <div className="text-center md:text-left pt-2 sm:pt-4 flex-1">
                       <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-white/5 border border-white/10 w-fit mx-auto md:mx-0">
-                          <div className="h-1.5 w-1.5 rounded-full bg-cyan-500 animate-pulse" />
-                          <span className="text-[9px] font-mono text-slate-300 uppercase tracking-[0.2em]">Status: Authorized_User</span>
-                        </div>
-                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest border-l border-white/10 pl-3 hidden md:block">Uplink_Node: {user?._id?.substring(0, 6).toUpperCase() || 'CORE_01'}</span>
                       </div>
-                      <h2 className="text-3xl sm:text-5xl lg:text-7xl font-black tracking-tighter leading-tight mb-4 bg-gradient-to-r from-white via-cyan-100 to-teal-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">Welcome, {user?.name || 'User'}</h2>
+                      <h2 className="text-3xl sm:text-5xl lg:text-7xl font-black tracking-tighter leading-tight mb-4 bg-gradient-to-r from-white via-cyan-100 to-teal-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] uppercase">Welcome, {user?.name || 'User'}</h2>
                       <p className="text-slate-400 text-sm md:text-base font-medium max-w-lg flex items-center gap-3 justify-center md:justify-start">
                         <span className="font-mono text-cyan-500/50">[{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}]</span>
-                        Neural sync complete. Ready to orchestrate session.
                       </p>
                     </div>
                   </div>
@@ -702,12 +703,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                  {[
-                    { label: "Meetings", value: "12", icon: Video, color: "text-cyan-400", bg: "bg-cyan-500/10" },
-                    { label: "Hours", value: "36h", icon: Clock, color: "text-purple-400", bg: "bg-purple-500/10" },
-                    { label: "Tasks", value: allTasks.length, icon: CheckSquare, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-                    { label: "Efficiency", value: "92%", icon: TrendingUp, color: "text-amber-400", bg: "bg-amber-500/10" },
-                  ].map((item, i) => (
+                  {stats.map((item, i) => (
                     <div key={i} className="group relative bg-white/[0.03] border border-white/10 backdrop-blur-2xl rounded-3xl p-5 sm:p-6 transition-all duration-500 hover:scale-[1.05] hover:border-white/20 hover:shadow-2xl overflow-hidden">
                       <div className={`absolute top-0 right-0 w-20 sm:w-24 h-20 sm:h-24 ${item.bg} blur-[50px] -mr-12 -mt-12 transition-all duration-500 group-hover:scale-150`}></div>
                       <div className="relative z-10 flex flex-col items-center md:items-start gap-4">
@@ -759,24 +755,6 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* RECENT ACTIVITY */}
-                <div className="bg-white/[0.04] border border-white/10 rounded-[2rem] p-6 sm:p-8 backdrop-blur-xl relative overflow-hidden group">
-                  <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
-                  <h3 className="text-xl font-bold mb-6 text-slate-200 flex items-center gap-3"><Activity size={20} className="text-cyan-400" /> System Logs / Recent Activity</h3>
-                  <div className="space-y-4 text-sm">
-                    {[
-                      { label: "Meeting completed", time: "2h ago", color: "text-cyan-400" },
-                      { label: "Task generated", time: "5h ago", color: "text-purple-400" },
-                      { label: "Joined workspace", time: "Yesterday", color: "text-emerald-400" },
-                    ].map((log, i) => (
-                      <div key={i} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 rounded-xl hover:bg-white/5 transition-colors group/log border border-transparent hover:border-white/5">
-                        <span className="text-slate-400 group-hover/log:text-slate-200 transition-colors">{log.label}</span>
-                        <span className={`font-mono text-xs ${log.color} opacity-80 mt-1 sm:mt-0`}>{log.time}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             )}
 
@@ -797,9 +775,6 @@ const Dashboard = () => {
                     <div className="text-center md:text-left pt-2 sm:pt-4 flex-1">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                         <div>
-                          <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-white/5 border border-white/10 w-fit"><div className="h-1.5 w-1.5 rounded-full bg-cyan-500 animate-pulse" /><span className="text-[9px] font-mono text-slate-300 uppercase tracking-[0.2em]">System_Status: Orchestrating_Syncs</span></div>
-                          </div>
                           <h2 className="text-3xl sm:text-5xl font-black tracking-tighter leading-tight mb-2 bg-gradient-to-r from-white via-cyan-100 to-teal-400 bg-clip-text text-transparent">Planned Sessions</h2>
                           <p className="text-slate-400 font-medium italic">Manage upcoming team sync protocols.</p>
                         </div>
@@ -888,12 +863,6 @@ const Dashboard = () => {
                     <div className="text-center md:text-left pt-2 sm:pt-4 flex-1">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
-                          <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-white/5 border border-white/10 w-fit mx-auto md:mx-0">
-                              <div className="h-1.5 w-1.5 rounded-full bg-cyan-500 animate-pulse" />
-                              <span className="text-[9px] font-mono text-slate-300 uppercase tracking-[0.2em]">Archive_System: Fetching_Logs</span>
-                            </div>
-                          </div>
                           <h2 className="text-3xl sm:text-5xl font-black tracking-tighter leading-tight mb-2 bg-gradient-to-r from-white via-cyan-100 to-teal-400 bg-clip-text text-transparent">Session Archive</h2>
                           <p className="text-slate-400 font-medium italic text-sm">Neural retrieval of legacy workspace data protocols.</p>
                         </div>
@@ -979,13 +948,7 @@ const Dashboard = () => {
                     <div className="text-center md:text-left pt-2 sm:pt-4 flex-1">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
-                          <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-white/5 border border-white/10 w-fit mx-auto md:mx-0">
-                              <div className="h-1.5 w-1.5 rounded-full bg-cyan-500 animate-pulse" />
-                              <span className="text-[9px] font-mono text-slate-300 uppercase tracking-[0.2em]">Task_Engine: Processing_Matrix</span>
-                            </div>
-                          </div>
-                          <h2 className="text-3xl sm:text-5xl font-black tracking-tighter leading-tight mb-2 bg-gradient-to-r from-white via-cyan-100 to-teal-400 bg-clip-text text-transparent uppercase">Intelligence Board</h2>
+                          <h2 className="text-3xl sm:text-5xl font-black tracking-tighter leading-tight mb-2 bg-gradient-to-r from-white via-cyan-100 to-teal-400 bg-clip-text text-transparent">Intelligence Board</h2>
                           <div className="relative max-w-md mx-auto md:mx-0 mt-6 group/search">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-500/50" size={18} />
                             <input type="text" placeholder="Query Board Matrix..." value={taskSearch} onChange={(e) => setTaskSearch(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm outline-none focus:border-cyan-500/50" />
@@ -1047,12 +1010,6 @@ const Dashboard = () => {
                     <div className="text-center md:text-left pt-2 sm:pt-4 flex-1">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                         <div>
-                          <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-white/5 border border-white/10 w-fit mx-auto md:mx-0">
-                              <div className="h-1.5 w-1.5 rounded-full bg-cyan-500 animate-pulse" />
-                              <span className="text-[9px] font-mono text-slate-300 uppercase tracking-[0.2em]">Metrics_System: Analyzing_Data</span>
-                            </div>
-                          </div>
                           <h2 className="text-3xl sm:text-5xl font-black tracking-tighter leading-tight mb-2 bg-gradient-to-r from-white via-cyan-100 to-teal-400 bg-clip-text text-transparent">Intelligence Insights</h2>
                           <p className="text-slate-400 font-medium italic text-sm">Advanced productivity mapping and performance synchronization.</p>
                         </div>
@@ -1156,12 +1113,6 @@ const Dashboard = () => {
                     <div className="text-center md:text-left pt-2 sm:pt-4 flex-1">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
-                          <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-white/5 border border-white/10 w-fit mx-auto md:mx-0">
-                              <div className="h-1.5 w-1.5 rounded-full bg-cyan-500 animate-pulse" />
-                              <span className="text-[9px] font-mono text-slate-300 uppercase tracking-[0.2em]">Profile_System: Config_Active</span>
-                            </div>
-                          </div>
                           <h2 className="text-3xl sm:text-5xl font-black tracking-tighter leading-tight mb-2 bg-gradient-to-r from-white via-cyan-100 to-teal-400 bg-clip-text text-transparent uppercase">Intelligence Profile</h2>
                           <p className="text-slate-500 mt-2 italic text-sm">Configure system identity and security protocols matrix.</p>
                         </div>
