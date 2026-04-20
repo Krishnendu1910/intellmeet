@@ -1,19 +1,30 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+
+// Move constant logic outside to prevent re-calculation on every mouse move
+const raw_url = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = raw_url.replace(/\/api\/?$/, '');
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [ripples, setRipples] = useState<any[]>([]);
     const [trailPoints, setTrailPoints] = useState<{ x: number, y: number }[]>([]);
     const fullText = "INTELLMEET";
     const [displayText, setDisplayText] = useState("");
+    const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
+    const setAuth = useAuthStore((state) => state.setAuth);
+    const navigate = useNavigate();
+    const rafRef = useRef<number | null>(null);
+
+    // Glitch Text Animation
     useEffect(() => {
         const chars = "!@#$%^&*()_+=-{}[]<>?/|";
         let i = 0;
@@ -42,23 +53,24 @@ export default function Login() {
         return () => clearInterval(interval);
     }, []);
 
-    const [mouse, setMouse] = useState({ x: 0, y: 0 });
-
-    const setAuth = useAuthStore((state) => state.setAuth);
-    const navigate = useNavigate();
-
-    const raw_url = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const API_URL = raw_url.replace(/\/api\/?$/, '');
-
+    // Mouse Trail Animation Logic - Optimized for Mobile
     useEffect(() => {
+        // Detect if device is touch-based to skip heavy trail logic
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (isTouchDevice) return;
+
         const animate = () => {
             setTrailPoints(prev => {
                 const next = [{ x: mouse.x, y: mouse.y }, ...prev];
                 return next.slice(0, 12);
             });
-            requestAnimationFrame(animate);
+            rafRef.current = requestAnimationFrame(animate);
         };
-        animate();
+        rafRef.current = requestAnimationFrame(animate);
+        
+        return () => {
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        };
     }, [mouse]);
 
     const handleClick = (e: React.MouseEvent) => {
@@ -70,22 +82,9 @@ export default function Login() {
         }, 600);
     };
 
-    const rafRef = useRef<number | null>(null);
-
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (rafRef.current) return;
-
-        rafRef.current = requestAnimationFrame(() => {
-            setMouse({ x: e.clientX, y: e.clientY });
-            rafRef.current = null;
-        });
+        setMouse({ x: e.clientX, y: e.clientY });
     };
-
-    useEffect(() => {
-        return () => {
-            if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        };
-    }, []);
 
     const [inputGlow, setInputGlow] = useState<{ x: number; y: number; active: boolean }>({
         x: 0,
@@ -109,6 +108,7 @@ export default function Login() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setIsLoading(true);
 
         try {
             const response = await axios.post(`${API_URL}/api/auth/login`, {
@@ -122,6 +122,8 @@ export default function Login() {
         } catch (err: unknown) {
             const error = err as { response?: { data?: { message?: string } } };
             setError(error.response?.data?.message || 'Failed to login. Check your credentials.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -132,7 +134,7 @@ export default function Login() {
             onMouseLeave={() => setMouse({ x: -9999, y: -9999 })}
             className="min-h-screen bg-[#020617] flex items-center justify-center px-4 sm:px-6 py-6 relative overflow-hidden"
         >
-
+            {/* Background Effects */}
             <div className="absolute inset-0 -z-10 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-3xl animate-gradient"></div>
             </div>
@@ -141,6 +143,7 @@ export default function Login() {
 
             <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
+            {/* Interactive Spotlight */}
             <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -152,6 +155,7 @@ export default function Login() {
                 }}
             ></div>
 
+            {/* Mouse Trail */}
             {trailPoints.map((p, i) => (
                 <div
                     key={i}
@@ -169,8 +173,22 @@ export default function Login() {
                 />
             ))}
 
+            {/* Ripple Effects */}
+            {ripples.map((ripple) => (
+                <span
+                    key={ripple.id}
+                    className="absolute bg-cyan-400/20 rounded-full pointer-events-none animate-ripple"
+                    style={{
+                        left: ripple.x,
+                        top: ripple.y,
+                        transform: 'translate(-50%, -50%)',
+                    }}
+                />
+            ))}
+
             <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/asfalt-light.png')]"></div>
 
+            {/* Login Card */}
             <div className="relative w-full max-w-md sm:max-w-lg p-5 sm:p-8 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
 
                 <div className="flex flex-col items-center mb-6 sm:mb-8">
@@ -225,6 +243,7 @@ export default function Login() {
                                 placeholder="name@company.com"
                                 className="relative w-full pl-10 pr-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder:text-slate-500 outline-none transition-all duration-300 ease-out sm:hover:scale-[1.02] sm:focus:scale-[1.03] focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 focus:shadow-[0_0_15px_rgba(34,211,238,0.25)]"
                                 required
+                                disabled={isLoading}
                             />
                         </div>
                     </div>
@@ -255,6 +274,7 @@ export default function Login() {
                                 placeholder="Enter your password"
                                 className="relative w-full pl-10 pr-10 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder:text-slate-500 outline-none transition-all duration-300 ease-out sm:hover:scale-[1.02] sm:focus:scale-[1.03] focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 focus:shadow-[0_0_15px_rgba(34,211,238,0.25)]"
                                 required
+                                disabled={isLoading}
                             />
 
                             <button
@@ -278,9 +298,17 @@ export default function Login() {
 
                     <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-semibold py-2.5 sm:py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 active:scale-[0.97]"
+                        disabled={isLoading}
+                        className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-semibold py-2.5 sm:py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 active:scale-[0.97] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        Connect to Workspace
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Connecting...
+                            </>
+                        ) : (
+                            "Connect to Workspace"
+                        )}
                     </button>
 
                 </form>

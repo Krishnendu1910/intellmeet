@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, memo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { Mic, MicOff, Video as VideoIcon, VideoOff, MonitorUp, MessageSquare, X, Users, Pin, Hand, Smile, Settings, Shield, Star, UserMinus, Check, Circle, StopCircle, Sparkles, Loader2, Send, FileText, Plus, CheckSquare, ChevronDown } from 'lucide-react';
+import { Mic, MicOff, Video as VideoIcon, VideoOff, MonitorUp, MessageSquare, X, Users, Pin, Hand, Smile, Settings, Shield, Star, UserMinus, Check, Circle, StopCircle, Sparkles, Loader2, Send, FileText, Plus, CheckSquare, ChevronDown, Download, ArrowRight, Radio } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 const FloatingEmojiStyles = () => (
@@ -17,6 +17,14 @@ const FloatingEmojiStyles = () => (
     @keyframes flicker {
       0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% { opacity: 1; }
       20%, 21.999%, 63%, 63.999%, 65%, 69.999% { opacity: 0.4; }
+    }
+    @keyframes pulse-red {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .record-pulse {
+      animation: pulse-red 2s infinite;
     }
   `}</style>
 );
@@ -52,7 +60,7 @@ const VideoPlayer = memo(({ stream, name, profilePic, isMuted = false, isVideoOf
   return (
     <div className={`bg-[#020617]/40 h-full w-full relative flex items-center justify-center rounded-2xl overflow-hidden group border-2 transition-all duration-500 backdrop-blur-sm ${isSpeaking ? 'border-cyan-500 shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'border-white/10 shadow-2xl'}`}>
       {isVideoOff ? (
-        <div className={`h-20 w-20 md:h-24 md:w-24 rounded-full flex items-center justify-center font-black text-white text-3xl uppercase shadow-[0_0_30px_rgba(0,0,0,0.5)] border-4 overflow-hidden transition-all duration-500 ${isSpeaking ? 'bg-cyan-500/20 border-cyan-500 animate-pulse' : 'bg-white/5 border-white/10'}`}>
+        <div className={`h-16 w-16 md:h-24 md:w-24 rounded-full flex items-center justify-center font-black text-white text-2xl md:text-3xl uppercase shadow-[0_0_30px_rgba(0,0,0,0.5)] border-4 overflow-hidden transition-all duration-500 ${isSpeaking ? 'bg-cyan-500/20 border-cyan-500 animate-pulse' : 'bg-white/5 border-white/10'}`}>
           {profilePic ? (
             <img src={profilePic} alt={name} className="h-full w-full object-cover" />
           ) : (
@@ -70,14 +78,14 @@ const VideoPlayer = memo(({ stream, name, profilePic, isMuted = false, isVideoOf
       )}
 
       {isHandRaised && (
-        <div className="absolute top-3 left-3 bg-blue-600/90 backdrop-blur-md p-1.5 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)] z-20 animate-bounce border border-white/20">
-          <Hand size={16} className="text-white" />
+        <div className="absolute top-2 left-2 md:top-3 md:left-3 bg-blue-600/90 backdrop-blur-md p-1 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)] z-20 animate-bounce border border-white/20">
+          <Hand size={14} className="text-white" />
         </div>
       )}
 
-      <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 bg-black/60 backdrop-blur-xl pl-2 pr-3 py-1.5 rounded-xl text-[10px] md:text-xs font-bold border border-white/10 text-white flex items-center gap-1.5 shadow-2xl z-10 transition-transform group-hover:scale-105">
-        <div className={`w-1.5 h-1.5 rounded-full ${isMuted ? 'bg-rose-500 shadow-[0_0_8px_#f43f5e]' : (isSpeaking ? 'bg-cyan-400 animate-ping shadow-[0_0_8px_#22d3ee]' : 'bg-emerald-500 shadow-[0_0_8px_#10b981]')}`} />
-        <span className="truncate max-w-[100px] md:max-w-[150px] tracking-widest uppercase font-mono">{name}</span>
+      <div className="absolute bottom-1.5 left-1.5 md:bottom-3 md:left-3 bg-black/60 backdrop-blur-xl px-2 py-1 md:pl-2 md:pr-3 md:py-1.5 rounded-lg md:rounded-xl text-[9px] md:text-xs font-bold border border-white/10 text-white flex items-center gap-1.5 shadow-2xl z-10 transition-transform group-hover:scale-105 max-w-[90%]">
+        <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isMuted ? 'bg-rose-500 shadow-[0_0_8px_#f43f5e]' : (isSpeaking ? 'bg-cyan-400 animate-ping shadow-[0_0_8px_#22d3ee]' : 'bg-emerald-500 shadow-[0_0_8px_#10b981]')}`} />
+        <span className="truncate tracking-wider uppercase font-mono">{name}</span>
       </div>
     </div>
   );
@@ -88,10 +96,9 @@ export default function MeetingRoom() {
   const navigate = useNavigate();
   const [socket, setSocket] = useState<Socket | null>(null);
 
-  // Styling States for Login Vibe
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [trailPoints, setTrailPoints] = useState<{ x: number, y: number }[]>([]);
-  const lobbyText = "INITIALIZING_NODE...";
+  const lobbyText = "Ready To Join?";
   const [displayText, setDisplayText] = useState("");
 
   const iceConfigRef = useRef<any>({
@@ -149,7 +156,11 @@ export default function MeetingRoom() {
   const [floatingEmojis, setFloatingEmojis] = useState<{ id: number, emoji: string, left: number }[]>([]);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
+  // Recording specific states
   const [isRecording, setIsRecording] = useState(false);
+  const [showRecordModal, setShowRecordModal] = useState(false);
+  const [recordQuality, setRecordQuality] = useState<'720p' | '1080p' | '4k'>('1080p');
+  const [captureAudio, setCaptureAudio] = useState(true);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
 
@@ -172,7 +183,6 @@ export default function MeetingRoom() {
   const [userName] = useState(() => user?.name || user?.firstName || `Guest-${Math.floor(Math.random() * 1000)}`);
   const userProfilePic = user?.profilePic || '';
 
-  // 🧪 Glitch & Animate logic (Same as Login.tsx)
   useEffect(() => {
     if (!inLobby) return;
     const chars = "!@#$%^&*()_+=-{}[]<>?/|";
@@ -191,15 +201,13 @@ export default function MeetingRoom() {
 
   useEffect(() => {
     let frameId: number;
-
     const animate = () => {
       setTrailPoints(prev => [{ x: mouse.x, y: mouse.y }, ...prev].slice(0, 12));
       frameId = requestAnimationFrame(animate);
     };
     frameId = requestAnimationFrame(animate);
-
     return () => cancelAnimationFrame(frameId);
-  }, []);
+  }, [mouse]);
 
   const showNotification = (msg: string, sender: string = "System") => {
     setToastNotification({ msg, sender });
@@ -212,11 +220,9 @@ export default function MeetingRoom() {
         const raw_url = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000';
         const API_URL = raw_url.replace(/\/api\/?$/, '');
         const token = localStorage.getItem('token');
-
         const res = await fetch(`${API_URL}/api/meetings/ice-servers`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
         if (res.ok) {
           const data = await res.json();
           iceConfigRef.current = { iceServers: data };
@@ -423,7 +429,6 @@ export default function MeetingRoom() {
       clearTimeout(typingTimeoutRef.current);
       Object.values(peersRef.current).forEach(pc => pc.close());
       if (audioContextRef.current) audioContextRef.current.close();
-
       if (screenSocketRef.current) screenSocketRef.current.disconnect();
       Object.values(screenPeersRef.current).forEach(pc => pc.close());
       setLocalScreenStream(prev => { prev?.getTracks().forEach(t => t.stop()); return null; });
@@ -438,9 +443,7 @@ export default function MeetingRoom() {
 
   const leaveMeeting = () => {
     myStream?.getTracks().forEach(t => t.stop());
-    if (isRecording) {
-      mediaRecorderRef.current?.stop();
-    }
+    if (isRecording) mediaRecorderRef.current?.stop();
     sessionStorage.removeItem(`intellmeet_room_${roomId}`);
     navigate('/dashboard');
   };
@@ -453,15 +456,12 @@ export default function MeetingRoom() {
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskInput.trim()) return;
-
     let assigneeIdValue = null;
     let assigneeNameValue = 'Unassigned';
-
     if (selectedAssignee !== 'unassigned') {
       assigneeIdValue = selectedAssignee;
       assigneeNameValue = peerNames[selectedAssignee] || userName;
     }
-
     const newTask = {
       id: Date.now().toString(),
       text: newTaskInput,
@@ -470,7 +470,6 @@ export default function MeetingRoom() {
       assigneeId: assigneeIdValue,
       assigneeName: assigneeNameValue
     };
-
     setMeetingTasks(prev => [...prev, newTask]);
     socket?.emit('add-task', { roomId, task: newTask });
     setNewTaskInput('');
@@ -501,25 +500,20 @@ export default function MeetingRoom() {
     if (!stream.getAudioTracks().length) return;
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContext) return;
-
     if (!audioContextRef.current) audioContextRef.current = new AudioContext();
     const audioContext = audioContextRef.current;
-
     try {
       const microphone = audioContext.createMediaStreamSource(stream);
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
       microphone.connect(analyser);
-
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       let speakingTimeout: any;
-
       const checkAudioLevel = () => {
         analyser.getByteFrequencyData(dataArray);
         let sum = 0;
         for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
         const average = sum / dataArray.length;
-
         if (average > 15) {
           if (!speakingPeers['local']) {
             setSpeakingPeers(prev => ({ ...prev, 'local': true }));
@@ -540,7 +534,6 @@ export default function MeetingRoom() {
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return;
-
     let recognition = recognitionRef.current;
     if (!recognition) {
       recognition = new SpeechRecognition();
@@ -549,25 +542,19 @@ export default function MeetingRoom() {
       recognition.lang = 'en-IN';
       recognitionRef.current = recognition;
     }
-
     let captionTimeout: any;
-
     recognition.onresult = (event: any) => {
       let currentText = '';
       let isFinalChunk = false;
-
       for (let i = event.resultIndex; i < event.results.length; i++) {
         currentText += event.results[i][0].transcript;
         if (event.results[i].isFinal) isFinalChunk = true;
       }
-
       if (currentText.trim()) {
         const displayText = currentText.length > 100 ? '...' + currentText.slice(-100) : currentText;
         setLiveCaption(displayText);
-
         clearTimeout(captionTimeout);
         captionTimeout = setTimeout(() => setLiveCaption(''), 4000);
-
         if (isFinalChunk) {
           const finalStr = `${userName}: ${currentText.trim()}`;
           socket?.emit('send-transcript', finalStr);
@@ -575,23 +562,19 @@ export default function MeetingRoom() {
         }
       }
     };
-
     recognition.onend = () => {
       if (!isMuted && captionsEnabled && recognitionRef.current) {
         try { recognitionRef.current.start(); } catch (e) { }
       }
     };
-
     recognition.onerror = (event: any) => {
       if (event.error === 'not-allowed') console.warn("Microphone permission denied for captions.");
     };
-
     if (!isMuted && captionsEnabled && !inLobby && !isWaiting) {
       try { recognition.start(); } catch (e) { }
     } else {
       try { recognition.stop(); } catch (e) { }
     }
-
     return () => {
       clearTimeout(captionTimeout);
       recognition.onresult = null;
@@ -599,7 +582,7 @@ export default function MeetingRoom() {
       recognition.onerror = null;
       try { recognition.stop(); } catch (e) { }
     };
-  }, [isMuted, socket, captionsEnabled, inLobby, isWaiting,userName]);
+  }, [isMuted, socket, captionsEnabled, inLobby, isWaiting, userName]);
 
   const generateAISummary = async () => {
     if (fullTranscript.length < 20) {
@@ -664,7 +647,6 @@ export default function MeetingRoom() {
     peersRef.current[peerId] = pc;
     pc.onicecandidate = (event) => { if (event.candidate) currentSocket.emit('ice-candidate', { target: peerId, candidate: event.candidate }); };
     pc.ontrack = (event) => { setRemoteStreams(prev => ({ ...prev, [peerId]: event.streams[0] })); };
-
     if (stream && stream.getTracks().length > 0) {
       stream.getTracks().forEach(track => pc.addTrack(track, stream));
     } else {
@@ -714,7 +696,6 @@ export default function MeetingRoom() {
       try {
         const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
         setLocalScreenStream(stream);
-
         stream.getVideoTracks()[0].onended = () => {
           setLocalScreenStream(prev => {
             if (prev) {
@@ -727,14 +708,11 @@ export default function MeetingRoom() {
             return null;
           });
         };
-
         const sSocket = io((import.meta as any).env.VITE_SOCKET_URL || 'http://localhost:5000');
         screenSocketRef.current = sSocket;
         const screenName = `${userName}'s Presentation`;
-
         sSocket.emit('join-room', { roomId, userName: screenName });
         setTimeout(() => { sSocket.emit('media-status-change', { roomId, isMuted: false, isVideoOff: false }); }, 1000);
-
         sSocket.on('user-connected', async ({ userId }) => {
           const pc = new RTCPeerConnection(iceConfigRef.current);
           screenPeersRef.current[userId] = pc;
@@ -744,7 +722,6 @@ export default function MeetingRoom() {
           await pc.setLocalDescription(offer);
           sSocket.emit('offer', { target: userId, sdp: offer, userName: screenName });
         });
-
         sSocket.on('offer', async (data) => {
           const pc = new RTCPeerConnection(iceConfigRef.current);
           screenPeersRef.current[data.caller] = pc;
@@ -755,48 +732,57 @@ export default function MeetingRoom() {
           await pc.setLocalDescription(answer);
           sSocket.emit('answer', { target: data.caller, sdp: answer, userName: screenName });
         });
-
         sSocket.on('answer', async (data) => {
           const pc = screenPeersRef.current[data.caller];
           if (pc) await pc.setRemoteDescription(new RTCSessionDescription(data.sdp)).catch(() => { });
         });
-
         sSocket.on('ice-candidate', async (data) => {
           const pc = screenPeersRef.current[data.caller];
           if (pc) await pc.addIceCandidate(new RTCIceCandidate(data.candidate)).catch(() => { });
         });
-
         setPinnedUserId('local-screen');
-
       } catch (err: any) {
         if (err.name !== "NotAllowedError") console.error("Screen share error:", err);
       }
     }
   };
 
-  const toggleRecording = async () => {
+  const toggleRecording = () => {
     if (isRecording) {
-      mediaRecorderRef.current?.stop();
-      setIsRecording(false);
-      showNotification("Recording saved automatically!", "System");
-      return;
+      if (mediaRecorderRef.current?.state === 'recording') {
+        mediaRecorderRef.current.stop();
+        setIsRecording(false);
+        showNotification("Recording saved automatically!", "System");
+      }
     }
+  };
 
+  const handleStartRecordingProtocol = async () => {
+    setShowRecordModal(false);
     try {
-      const constraints: any = {
-        video: { displaySurface: "browser" },
-        audio: true
-      };
-      const stream = await navigator.mediaDevices.getDisplayMedia(constraints);
+      const width = recordQuality === '4k' ? 3840 : recordQuality === '1080p' ? 1920 : 1280;
+      const height = recordQuality === '4k' ? 2160 : recordQuality === '1080p' ? 1080 : 720;
+      
+      // We use our existing myStream or capture a direct camera stream to avoid the share picker
+      let recordingStream: MediaStream;
+      if (myStream && !isVideoOff) {
+        recordingStream = myStream;
+      } else {
+        recordingStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { width, height }, 
+          audio: captureAudio 
+        });
+      }
 
-      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+      const recorder = new MediaRecorder(recordingStream, { 
+        mimeType: 'video/webm;codecs=vp9' 
+      });
+      
       mediaRecorderRef.current = recorder;
       recordedChunksRef.current = [];
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
-      };
-
+      
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunksRef.current.push(e.data); };
+      
       recorder.onstop = () => {
         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
@@ -807,26 +793,14 @@ export default function MeetingRoom() {
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      stream.getVideoTracks()[0].onended = () => {
-        if (mediaRecorderRef.current?.state === 'recording') {
-          mediaRecorderRef.current.stop();
-          setIsRecording(false);
-          showNotification("Recording saved automatically!", "System");
-        }
       };
 
       recorder.start(1000);
       setIsRecording(true);
       showNotification("Meeting Recording Started!", "System");
-
     } catch (err: any) {
-      if (err.name !== "NotAllowedError") {
-        console.error("Recording error:", err);
-        showNotification("Failed to start recording.", "System");
-      }
+      console.error("Recording error:", err);
+      showNotification("Failed to start recording.", "System");
     }
   };
 
@@ -857,7 +831,6 @@ export default function MeetingRoom() {
   };
 
   const allPeerIds = Object.keys(peerNames);
-
   const sortedPeerIds = [...allPeerIds].sort((a, b) => {
     if (raisedHands[a] && !raisedHands[b]) return -1;
     if (!raisedHands[a] && raisedHands[b]) return 1;
@@ -872,15 +845,11 @@ export default function MeetingRoom() {
 
   const activePeers = sortedPeerIds.filter(id => !peerStatus[id]?.isVideoOff);
   const hiddenPeers = sortedPeerIds.filter(id => peerStatus[id]?.isVideoOff);
-
-  if (localScreenStream) {
-    activePeers.unshift('local-screen');
-  }
+  if (localScreenStream) activePeers.unshift('local-screen');
 
   const groupedPeersLimit = hiddenPeers.length > 3 ? 2 : hiddenPeers.length;
   const renderedHiddenPeers = hiddenPeers.slice(0, groupedPeersLimit);
   const remainingHiddenCount = hiddenPeers.length - groupedPeersLimit;
-
   const totalTiles = activePeers.length + renderedHiddenPeers.length + (remainingHiddenCount > 0 ? 1 : 0);
 
   const getGridClasses = (count: number) => {
@@ -898,112 +867,43 @@ export default function MeetingRoom() {
   } else if (sortedPeerIds.length > 0 && speakingPeers[sortedPeerIds[0]]) {
     autoPinned = sortedPeerIds[0];
   }
-
   const displayPinnedId = pinnedUserId || autoPinned;
 
   if (inLobby) {
     return (
-      <div
-        onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
-        className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden"
-      >
+      <div onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })} className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden">
         <FloatingEmojiStyles />
-
-        {/* 🌊 Login.tsx Background Elements */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-3xl animate-gradient"></div>
-        </div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(34,211,238,0.15),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(16,185,129,0.15),transparent_40%)]"></div>
-        <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-
-        {/* 🟢 Mouse Glow Effect */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: `radial-gradient(200px circle at ${mouse.x}px ${mouse.y}px, rgba(34,211,238,0.18), transparent 60%)` }}
-        ></div>
-
-        {/* 🟢 Comet Trail Glow */}
-        {trailPoints.map((p, i) => (
-          <div key={i} className="absolute pointer-events-none rounded-full"
-            style={{
-              left: p.x, top: p.y,
-              width: 160 - i * 8, height: 160 - i * 8,
-              transform: "translate(-50%, -50%)",
-              background: "radial-gradient(circle, rgba(34,211,238,0.25), transparent 70%)",
-              opacity: 0.7 - i * 0.06, filter: "blur(14px)",
-            }}
-          />
-        ))}
-
-        {/* Noise Texture */}
-        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/asfalt-light.png')]"></div>
-
-        {/* 🎯 MAIN LOBBY CARD */}
+        <div className="absolute inset-0 -z-10 overflow-hidden"><div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-3xl animate-gradient" /></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(34,211,238,0.15),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(16,185,129,0.15),transparent_40%)]" />
+        <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]" />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(200px circle at ${mouse.x}px ${mouse.y}px, rgba(34,211,238,0.18), transparent 60%)` }} />
+        {trailPoints.map((p, i) => (<div key={i} className="absolute pointer-events-none rounded-full" style={{ left: p.x, top: p.y, width: 160 - i * 8, height: 160 - i * 8, transform: "translate(-50%, -50%)", background: "radial-gradient(circle, rgba(34,211,238,0.25), transparent 70%)", opacity: 0.7 - i * 0.06, filter: "blur(14px)" }} />))}
         <div className="relative w-full max-w-4xl p-6 md:p-8 rounded-[2rem] bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.8)] flex flex-col items-center">
-
           <div className="flex flex-col items-center mb-8">
-            <div className="bg-gradient-to-br from-teal-500 to-cyan-500 p-3 rounded-2xl shadow-lg shadow-cyan-500/30 mb-6">
-              <VideoIcon size={32} className="text-white" />
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-[0.25em] text-white text-center">
-              <span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent animate-[flicker_2s_infinite]">
-                {displayText}
-              </span>
-            </h1>
+            <div className="bg-gradient-to-br from-teal-500 to-cyan-500 p-3 rounded-2xl shadow-lg shadow-cyan-500/30 mb-6"><VideoIcon size={32} className="text-white" /></div>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-[0.25em] text-white text-center"><span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent animate-[flicker_2s_infinite]">{displayText}</span></h1>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-start">
-
-            {/* Left: Video Preview Section */}
             <div className="w-full flex flex-col justify-between h-full">
               <div className="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-white/10 shadow-2xl group flex-1 min-h-[260px]">
-                <div className="absolute inset-0">
-                  <VideoPlayer
-                    stream={myStream}
-                    name={`${userName} (You)`}
-                    profilePic={userProfilePic}
-                    isVideoOff={isVideoOff}
-                    isMuted={isMuted} // PASSING isMuted state
-                    isLocal={true}
-                  />
-                </div>
-
-                {/* Internal Overlay Controls */}
+                <VideoPlayer stream={myStream} name={`${userName} (You)`} profilePic={userProfilePic} isVideoOff={isVideoOff} isMuted={isMuted} isLocal={true} />
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4 z-30">
-                  <button onClick={toggleMute} className={`p-4 rounded-2xl transition-all duration-300 ${isMuted ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>
-                    {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
-                  </button>
-                  <button onClick={toggleVideo} className={`p-4 rounded-2xl transition-all duration-300 ${isVideoOff ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>
-                    {isVideoOff ? <VideoOff size={20} /> : <VideoIcon size={20} />}
-                  </button>
+                  <button onClick={toggleMute} className={`p-4 rounded-2xl transition-all duration-300 ${isMuted ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>{isMuted ? <MicOff size={20} /> : <Mic size={20} />}</button>
+                  <button onClick={toggleVideo} className={`p-4 rounded-2xl transition-all duration-300 ${isVideoOff ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'}`}>{isVideoOff ? <VideoOff size={20} /> : <VideoIcon size={20} />}</button>
                 </div>
               </div>
             </div>
-
-            {/* Right: Join Actions */}
             <div className="w-full space-y-6 flex flex-col justify-start mt-2">
               <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
                 <h3 className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-4 text-center">Identity Matrix</h3>
                 <div className="flex items-center gap-4 bg-black/40 p-4 rounded-xl border border-white/5">
-                  <div className="h-12 w-12 rounded-lg overflow-hidden border border-cyan-500/30">
-                    {userProfilePic ? <img src={userProfilePic} className="h-full w-full object-cover" /> : <div className="bg-slate-800 h-full w-full flex items-center justify-center font-bold text-cyan-400">{userName.charAt(0)}</div>}
-                  </div>
+                  <div className="h-12 w-12 rounded-lg overflow-hidden border border-cyan-500/30">{userProfilePic ? <img src={userProfilePic} className="h-full w-full object-cover" /> : <div className="bg-slate-800 h-full w-full flex items-center justify-center font-bold text-cyan-400">{userName.charAt(0)}</div>}</div>
                   <span className="font-mono text-cyan-400 text-base font-bold truncate">{userName}</span>
                 </div>
               </div>
-
               <div className="flex flex-col gap-4">
-                <button
-                  onClick={handleJoinClick}
-                  className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-black font-black py-4 rounded-2xl transition-all shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 active:scale-[0.97] uppercase tracking-widest text-sm"
-                >
-                  Join Meeting
-                </button>
-                <button
-                  onClick={leaveMeeting}
-                  className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-2xl transition-all border border-white/10 uppercase tracking-widest text-[10px]"
-                >
-                  Abort Session
-                </button>
+                <button onClick={handleJoinClick} className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-black font-black py-4 rounded-2xl transition-all shadow-lg shadow-cyan-500/30 active:scale-[0.97] uppercase tracking-widest text-sm">Join Meeting</button>
+                <button onClick={leaveMeeting} className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-2xl transition-all border border-white/10 uppercase tracking-widest text-[10px]">Abort Session</button>
               </div>
               <p className="text-[9px] text-slate-500 text-center uppercase tracking-[0.2em] italic">End-to-end encrypted protocol active</p>
             </div>
@@ -1015,385 +915,131 @@ export default function MeetingRoom() {
 
   if (isWaiting) {
     return (
-      <div
-        onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
-        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#020617] overflow-hidden"
-      >
-
-        {/* 🌊 GRADIENT */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-3xl animate-gradient"></div>
-        </div>
-
-        {/* BASE GLOW */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(34,211,238,0.15),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(16,185,129,0.15),transparent_40%)]"></div>
-
-        {/* GRID */}
-        <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-
-        {/* 🟢 MOUSE GLOW */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `radial-gradient(
-            200px circle at ${mouse.x}px ${mouse.y}px,
-            rgba(34,211,238,0.18),
-            transparent 60%
-          )`,
-          }}
-        />
-
-        {/* 🎯 CARD */}
+      <div onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#020617] overflow-hidden">
+        <div className="absolute inset-0 -z-10 overflow-hidden"><div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-3xl animate-gradient" /></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(34,211,238,0.15),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(16,185,129,0.15),transparent_40%)]" />
+        <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]" />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(200px circle at ${mouse.x}px ${mouse.y}px, rgba(34,211,238,0.18), transparent 60%)` }} />
         <div className="relative w-full max-w-md p-8 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_70px_rgba(0,0,0,0.8)] text-center animate-in fade-in zoom-in duration-500">
-
-          {/* 🔄 SPINNER */}
-          <div className="relative flex justify-center mb-6">
-            <div className="w-16 h-16 rounded-full border-4 border-cyan-500/30"></div>
-            <div className="absolute w-16 h-16 border-4 border-t-cyan-400 border-transparent rounded-full animate-spin"></div>
-          </div>
-
-          {/* TITLE */}
-          <h2 className="text-2xl font-bold mb-2">
-            <span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent">
-              Joining Meeting
-            </span>
-          </h2>
-
-          {/* SUBTEXT */}
-          <p className="text-slate-400 text-sm">
-            Verifying host permissions. Please wait.
-          </p>
-
-          {/* BUTTON */}
-          <button
-            onClick={leaveMeeting}
-            className="mt-8 w-full py-3 rounded-xl font-semibold text-white
-          bg-white/10 backdrop-blur-md border border-white/10 
-          hover:bg-white/20 transition-all duration-300 active:scale-[0.97]"
-          >
-            Leave
-          </button>
-
+          <div className="relative flex justify-center mb-6"><div className="w-16 h-16 rounded-full border-4 border-cyan-500/30" /><div className="absolute w-16 h-16 border-4 border-t-cyan-400 border-transparent rounded-full animate-spin" /></div>
+          <h2 className="text-2xl font-bold mb-2"><span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent">Joining Meeting</span></h2>
+          <p className="text-slate-400 text-sm">Verifying host permissions. Please wait.</p>
+          <button onClick={leaveMeeting} className="mt-8 w-full py-3 rounded-xl font-semibold text-white bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-all duration-300 active:scale-[0.97]">Leave</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div
-      onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
-      className="fixed inset-0 h-[100dvh] w-full text-white flex overflow-hidden font-sans bg-[#020617]"
-    >
-
-      {/* 🌊 Animated Gradient */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-3xl animate-gradient"></div>
-      </div>
-
-      {/* Base Gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(34,211,238,0.15),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(16,185,129,0.15),transparent_40%)]"></div>
-
-      {/* Grid */}
-      <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-
-      {/* Mouse Glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `radial-gradient(
-      200px circle at ${mouse.x}px ${mouse.y}px,
-      rgba(34,211,238,0.18),
-      transparent 60%
-    )`,
-        }}
-      />
-
-      {/* Trail */}
-      {trailPoints.map((p, i) => (
-        <div
-          key={i}
-          className="absolute pointer-events-none rounded-full"
-          style={{
-            left: p.x,
-            top: p.y,
-            width: 160 - i * 8,
-            height: 160 - i * 8,
-            transform: "translate(-50%, -50%)",
-            background: "radial-gradient(circle, rgba(34,211,238,0.25), transparent 70%)",
-            opacity: 0.7 - i * 0.06,
-            filter: "blur(14px)",
-          }}
-        />
-      ))}
-
-      {/* Noise */}
-      <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/asfalt-light.png')]"></div>
+    <div onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })} className="fixed inset-0 h-[100dvh] w-full text-white flex overflow-hidden font-sans bg-[#020617]">
+      <div className="absolute inset-0 -z-10 overflow-hidden"><div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-3xl animate-gradient" /></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(34,211,238,0.15),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(16,185,129,0.15),transparent_40%)]" />
+      <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]" />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(200px circle at ${mouse.x}px ${mouse.y}px, rgba(34,211,238,0.18), transparent 60%)` }} />
+      {trailPoints.map((p, i) => (<div key={i} className="absolute pointer-events-none rounded-full" style={{ left: p.x, top: p.y, width: 160 - i * 8, height: 160 - i * 8, transform: "translate(-50%, -50%)", background: "radial-gradient(circle, rgba(34,211,238,0.25), transparent 70%)", opacity: 0.7 - i * 0.06, filter: "blur(14px)" }} />))}
       <FloatingEmojiStyles />
 
       {aiSummaryResult && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-
-          {/* 🔥 BACKGROUND */}
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl"></div>
-
-          <div className="absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-3xl"></div>
-          </div>
-
-          {/* 🎯 CARD */}
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
           <div className="relative w-full max-w-lg p-6 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_70px_rgba(0,0,0,0.9)]">
-
-            {/* ❌ CLOSE */}
-            <button
-              onClick={() => setAiSummaryResult(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-cyan-400 transition"
-            >
-              <X size={20} />
-            </button>
-
-            {/* ✨ HEADER */}
-            <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">
-              <Sparkles size={22} className="text-cyan-400" />
-              <span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent">
-                AI Meeting Summary
-              </span>
-            </h2>
-
-            {/* 📄 CONTENT */}
+            <button onClick={() => setAiSummaryResult(null)} className="absolute top-4 right-4 text-slate-400 hover:text-cyan-400 transition"><X size={20} /></button>
+            <h2 className="text-2xl font-bold mb-5 flex items-center gap-2"><Sparkles size={22} className="text-cyan-400" /><span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent">AI Meeting Summary</span></h2>
             <div className="bg-black/40 border border-white/10 backdrop-blur-xl p-5 rounded-xl text-slate-200 text-sm leading-relaxed max-h-[60vh] overflow-y-auto space-y-2">
-
-              {aiSummaryResult.split('\n').map((line, i) => {
-                if (line.includes('**')) {
-                  const parts = line.split('**');
-                  return (
-                    <p key={`line-${i}`}>
-                      {parts.map((part, index) =>
-                        index % 2 === 1 ? (
-                          <strong
-                            key={`bold-${i}-${index}`}
-                            className="text-white bg-white/10 border border-white/10 px-1.5 py-0.5 rounded-md shadow-sm"
-                          >
-                            {part}
-                          </strong>
-                        ) : (
-                          <span key={`text-${i}-${index}`}>{part}</span>
-                        )
-                      )}
-                    </p>
-                  );
-                }
-
-                if (line.trim().startsWith('-') || line.trim().startsWith('*')) {
-                  return (
-                    <li
-                      key={`list-${i}`}
-                      className="ml-4 text-cyan-300 list-disc"
-                    >
-                      {line.replace(/^[-*]/, '').trim()}
-                    </li>
-                  );
-                }
-
-                return <p key={`para-${i}`}>{line}</p>;
-              })}
+              {aiSummaryResult.split('\n').map((line, i) => line.includes('**') ? <p key={i}>{line.split('**').map((part, index) => index % 2 === 1 ? <strong key={index} className="text-white bg-white/10 border border-white/10 px-1.5 py-0.5 rounded-md shadow-sm">{part}</strong> : part)}</p> : line.trim().startsWith('-') || line.trim().startsWith('*') ? <li key={i} className="ml-4 text-cyan-300 list-disc">{line.replace(/^[-*]/, '').trim()}</li> : <p key={i}>{line}</p>)}
             </div>
-
-            {/* 🔘 BUTTON */}
-            <button
-              onClick={() => setAiSummaryResult(null)}
-              className="mt-6 w-full py-3 rounded-xl font-semibold text-white
-              bg-gradient-to-r from-teal-500 to-cyan-500
-              shadow-lg shadow-cyan-500/30
-              hover:scale-[1.03] active:scale-[0.97]
-              transition-all"
-            >
-              Close
-            </button>
-
+            <button onClick={() => setAiSummaryResult(null)} className="mt-6 w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-teal-500 to-cyan-500 shadow-lg shadow-cyan-500/30 hover:scale-[1.03] transition-all">Close</button>
           </div>
         </div>
       )}
 
-      {showSecurityModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-
-          {/* 🔥 BACKGROUND BLUR + GRADIENT */}
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-xl"></div>
-
-          <div className="absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-3xl"></div>
-          </div>
-
-          {/* 🎯 MODAL CARD */}
-          <div className="relative w-full max-w-sm mx-4 p-6 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
-
-            {/* CLOSE BUTTON */}
-            <button
-              onClick={() => setShowSecurityModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-cyan-400 transition"
-            >
-              <X size={20} />
-            </button>
-
-            {/* HEADER */}
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <Shield size={22} className="text-cyan-400" />
-              <span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent">
-                Security Controls
-              </span>
-            </h2>
-
-            {/* OPTIONS */}
-            <div className="space-y-3">
-
-              <p className="text-sm text-slate-400 mb-3">
-                Allow participants to:
-              </p>
-
-              {[
-                { key: 'mic', label: 'Turn on Microphone' },
-                { key: 'video', label: 'Turn on Video' },
-                { key: 'screen', label: 'Share Screen' },
-                { key: 'record', label: 'Record Meeting' },
-                { key: 'notes', label: 'Edit Shared Notes' },
-                { key: 'tasks', label: 'Create Tasks' }
-              ].map((item) => (
-                <label
-                  key={item.key}
-                  className="flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-300 bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-[1.02]"
-                >
-                  <span className="text-sm font-medium text-slate-200">
-                    {item.label}
-                  </span>
-
-                  {/* 🔘 CUSTOM TOGGLE */}
-                  <button
-                    type="button"
-                    onClick={() => handleSecurityUpdate(item.key as any)}
-                    className={`w-12 h-6 rounded-full transition-all relative ${globalPermissions[item.key as keyof typeof globalPermissions]
-                      ? 'bg-gradient-to-r from-teal-500 to-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.6)]'
-                      : 'bg-slate-700'
-                      }`}
-                  >
-                    <span
-                      className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${globalPermissions[item.key as keyof typeof globalPermissions]
-                        ? 'translate-x-6'
-                        : 'translate-x-0'
-                        }`}
-                    />
-                  </button>
-                </label>
-              ))}
-
+      {showRecordModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setShowRecordModal(false)} />
+          <div className="relative w-full max-w-sm p-6 rounded-3xl bg-slate-900/90 backdrop-blur-2xl border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.8)] animate-in fade-in zoom-in duration-300">
+            <button onClick={() => setShowRecordModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white transition"><X size={20} /></button>
+            
+            <div className="mb-8">
+              <div className="bg-rose-500/20 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 border border-rose-500/30"><Radio size={24} className="text-rose-500" /></div>
+              <h2 className="text-xl font-black text-white uppercase tracking-widest">Capture Session</h2>
+              <p className="text-xs text-slate-500 mt-1 italic">Configure neural recording parameters.</p>
             </div>
-          </div>
-        </div>
-      )}
 
-      {showSettingsModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-
-          {/* 🔥 BACKGROUND */}
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-xl"></div>
-
-          <div className="absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-3xl"></div>
-          </div>
-
-          {/* 🎯 CARD */}
-          <div className="relative w-full max-w-md mx-4 p-6 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
-
-            {/* CLOSE */}
-            <button
-              onClick={() => setShowSettingsModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-cyan-400 transition"
-            >
-              <X size={20} />
-            </button>
-
-            {/* HEADER */}
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <Settings size={22} className="text-cyan-400" />
-              <span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent">
-                Meeting Settings
-              </span>
-            </h2>
-
-            <div className="space-y-4">
-
-              {/* 🎤 LIVE CAPTIONS */}
-              <div className="bg-white/5 border border-white/10 p-4 rounded-xl flex justify-between items-center hover:bg-white/10 transition-all duration-300">
-                <div>
-                  <p className="text-sm text-slate-200 font-semibold">Live Captions</p>
-                  <p className="text-xs text-slate-400">Auto-transcribe speech to text</p>
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2"><VideoIcon size={12} className="text-cyan-400" /> Video Quality</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {['720p', '1080p', '4k'].map((q) => (
+                    <button key={q} onClick={() => setRecordQuality(q as any)} className={`py-2 text-[10px] font-mono font-bold rounded-xl border transition-all ${recordQuality === q ? 'bg-cyan-500 border-cyan-400 text-black shadow-[0_0_15px_rgba(34,211,238,0.4)]' : 'bg-white/5 border border-white/10 text-slate-500 hover:border-white/20'}`}>{q.toUpperCase()}</button>
+                  ))}
                 </div>
+              </div>
 
-                {/* 🔘 TOGGLE */}
-                <button
-                  onClick={() => setCaptionsEnabled(!captionsEnabled)}
-                  className={`w-12 h-6 rounded-full transition-all relative ${captionsEnabled
-                    ? 'bg-gradient-to-r from-teal-500 to-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.6)]'
-                    : 'bg-slate-700'
-                    }`}
-                >
-                  <span
-                    className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${captionsEnabled ? 'translate-x-6' : 'translate-x-0'
-                      }`}
-                  />
+              <label className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 cursor-pointer group hover:bg-white/10 transition-all">
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-slate-200">Capture Audio</span>
+                  <span className="text-[9px] text-slate-500 uppercase font-mono">Include system streams</span>
+                </div>
+                <button type="button" onClick={() => setCaptureAudio(!captureAudio)} className={`w-10 h-5 rounded-full relative transition-all ${captureAudio ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-slate-700'}`}>
+                  <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${captureAudio ? 'translate-x-5' : 'translate-x-0'}`} />
                 </button>
-              </div>
+              </label>
 
-              {/* 🧩 LAYOUT MODE */}
-              <div className="bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-all duration-300">
-                <p className="text-sm text-slate-200 font-semibold mb-1">Layout Mode</p>
-                <p className="text-xs text-slate-400 mb-3">Choose how videos are displayed</p>
-
-                <select
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white outline-none transition-all duration-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 focus:shadow-[0_0_10px_rgba(34,211,238,0.3)]"
-                  value={layoutMode}
-                  onChange={(e) => setLayoutMode(e.target.value as 'grid' | 'sidebar')}
-                >
-                  <option value="grid">Auto Grid</option>
-                  <option value="sidebar">Sidebar Priority</option>
-                </select>
-              </div>
-
+              <button 
+                onClick={handleStartRecordingProtocol}
+                className="w-full bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-rose-500/20 active:scale-95 transition-all"
+              >
+                Initialize Recording
+              </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {(showSecurityModal || showSettingsModal) && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-xl" onClick={() => { setShowSecurityModal(false); setShowSettingsModal(false); }} />
+          <div className="relative w-full max-w-sm mx-4 p-6 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
+            <button onClick={() => { setShowSecurityModal(false); setShowSettingsModal(false); }} className="absolute top-4 right-4 text-slate-400 hover:text-cyan-400 transition"><X size={20} /></button>
+            {showSecurityModal ? (
+              <>
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><Shield size={22} className="text-cyan-400" /><span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent">Security Controls</span></h2>
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-400 mb-3">Allow participants to:</p>
+                  {[{ key: 'mic', label: 'Turn on Microphone' }, { key: 'video', label: 'Turn on Video' }, { key: 'screen', label: 'Share Screen' }, { key: 'record', label: 'Record Meeting' }, { key: 'notes', label: 'Edit Shared Notes' }, { key: 'tasks', label: 'Create Tasks' }].map((item) => (
+                    <label key={item.key} className="flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all bg-white/5 border border-white/10 hover:bg-white/10"><span className="text-sm font-medium text-slate-200">{item.label}</span><button type="button" onClick={() => handleSecurityUpdate(item.key as any)} className={`w-12 h-6 rounded-full transition-all relative ${globalPermissions[item.key as keyof typeof globalPermissions] ? 'bg-gradient-to-r from-teal-500 to-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.6)]' : 'bg-slate-700'}`}><span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${globalPermissions[item.key as keyof typeof globalPermissions] ? 'translate-x-6' : 'translate-x-0'}`} /></button></label>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><Settings size={22} className="text-cyan-400" /><span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent">Meeting Settings</span></h2>
+                <div className="space-y-4">
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-xl flex justify-between items-center transition-all">
+                    <div><p className="text-sm text-slate-200 font-semibold">Live Captions</p><p className="text-xs text-slate-400">Auto-transcribe speech</p></div>
+                    <button onClick={() => setCaptionsEnabled(!captionsEnabled)} className={`w-12 h-6 rounded-full transition-all relative ${captionsEnabled ? 'bg-gradient-to-r from-teal-500 to-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.6)]' : 'bg-slate-700'}`}><span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${captionsEnabled ? 'translate-x-6' : 'translate-x-0'}`} /></button>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-xl transition-all">
+                    <p className="text-sm text-slate-200 font-semibold mb-1">Layout Mode</p><p className="text-xs text-slate-400 mb-3">Video display preference</p>
+                    <select className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white outline-none" value={layoutMode} onChange={(e) => setLayoutMode(e.target.value as 'grid' | 'sidebar')}><option value="grid">Auto Grid</option><option value="sidebar">Sidebar Priority</option></select>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
 
       {showEmojiPicker && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[200]">
-
-          {/* 🔥 BACK GLOW */}
-          <div className="absolute inset-0 -z-10">
-            <div className="w-full h-full bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-2xl rounded-full"></div>
-          </div>
-
-          {/* 🎯 MAIN CONTAINER */}
+          <div className="absolute inset-0 -z-10"><div className="w-full h-full bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-500 opacity-20 blur-2xl rounded-full" /></div>
           <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-full px-5 py-3 flex gap-4 shadow-[0_0_40px_rgba(0,0,0,0.8)] animate-in fade-in slide-in-from-bottom-2">
-
-            {['👍', '👏', '❤️', '😂', '😲', '🎉'].map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => sendReaction(emoji)}
-                className="relative text-2xl md:text-3xl transition-all duration-300 hover:scale-125 active:scale-95"
-              >
-                {/* 🔵 HOVER GLOW */}
-                <span className="absolute inset-0 rounded-full bg-cyan-400/20 blur-xl opacity-0 hover:opacity-100 transition"></span>
-
-                {/* EMOJI */}
-                <span className="relative z-10">{emoji}</span>
-              </button>
-            ))}
-
+            {['👍', '👏', '❤️', '😂', '😲', '🎉'].map((emoji) => (<button key={emoji} onClick={() => sendReaction(emoji)} className="relative text-2xl md:text-3xl transition-all hover:scale-125 active:scale-95"><span className="absolute inset-0 rounded-full bg-cyan-400/20 blur-xl opacity-0 hover:opacity-100 transition" /><span className="relative z-10">{emoji}</span></button>))}
           </div>
         </div>
       )}
 
       <div className={`flex-1 flex flex-col p-2 md:p-4 relative transition-all duration-300 ${showSidebar ? 'md:mr-[350px]' : 'w-full'} h-full`}>
-
         {toastNotification && (
           <div className="absolute top-4 right-4 md:top-8 md:right-8 bg-slate-800 border-l-4 border-blue-500 shadow-2xl px-4 py-3 rounded-lg z-50 flex flex-col animate-in slide-in-from-top-4 fade-in duration-300 max-w-xs">
             <span className="text-xs text-blue-400 font-bold uppercase">{toastNotification.sender}</span>
@@ -1401,137 +1047,44 @@ export default function MeetingRoom() {
           </div>
         )}
 
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-3 md:mb-5 px-3 md:px-4 z-10 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.6)] py-2 md:py-3">
-
-          {/* 🧠 ROOM INFO */}
-          <h2 className="text-sm md:text-xl font-bold tracking-tight flex items-center gap-3">
-
-            <span className="text-slate-400 text-xs md:text-sm font-mono tracking-widest uppercase opacity-60 hidden sm:block">Room_Link:</span>
-
-            <span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent font-semibold">
-              {roomId}
-            </span>
-
-            <div className="hidden sm:flex gap-2 ml-2">
-              {myRole === 'creator' && (
-                <span className="bg-gradient-to-r from-blue-500 to-cyan-500 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-[0_0_10px_rgba(34,211,238,0.3)]">
-                  Host
-                </span>
-              )}
-              {myRole === 'co-host' && (
-                <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
-                  Co-Host
-                </span>
-              )}
+        <div className="flex justify-between items-center mb-3 md:mb-5 px-3 md:px-4 z-10 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.6)] py-2 md:py-3 min-h-[56px] md:min-h-0">
+          <h2 className="text-sm md:text-xl font-bold tracking-tight flex items-center gap-2 sm:gap-3 overflow-hidden">
+            <span className="text-slate-400 text-[10px] md:text-sm font-mono tracking-widest uppercase opacity-60 hidden sm:block shrink-0">Room_Link:</span>
+            <span className="bg-gradient-to-r from-white via-cyan-300 to-teal-400 bg-clip-text text-transparent font-semibold truncate">{roomId}</span>
+            <div className="flex gap-1.5 sm:gap-2 shrink-0">
+              {myRole === 'creator' && <span className="bg-gradient-to-r from-blue-500 to-cyan-500 text-[8px] sm:text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-[0_0_10px_rgba(34,211,238,0.3)]">Host</span>}
+              {myRole === 'co-host' && <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-[8px] sm:text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow">Co-Host</span>}
             </div>
           </h2>
 
-          {/* ⚙️ ACTIONS */}
-          <div className="flex gap-2 items-center relative">
-
-            {/* 📱 MOBILE */}
-            <div className="md:hidden flex items-center gap-2">
-
-              {myRole === 'creator' && (
-                <button
-                  onClick={handleEndMeeting}
-                  disabled={isGeneratingAI}
-                  className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 px-3 py-1.5 rounded-xl text-[10px] font-bold text-white shadow-lg transition flex items-center gap-1 active:scale-[0.95]"
-                >
-                  {isGeneratingAI ? <Loader2 className="animate-spin" size={14} /> : <StopCircle size={14} />}
-                  End
-                </button>
-              )}
-
-              {(myRole === 'creator' || myRole === 'co-host') && (
-                <button
-                  onClick={() => setShowSecurityModal(true)}
-                  className="bg-white/10 backdrop-blur-md border border-white/10 p-2 rounded-xl text-cyan-400 hover:bg-white/20 transition"
-                >
-                  <Shield size={16} />
-                </button>
-              )}
-
-              <button
-                onClick={() => setShowSettingsModal(true)}
-                className="bg-white/10 backdrop-blur-md border border-white/10 p-2 rounded-xl text-slate-300 hover:bg-white/20 transition"
-              >
-                <Settings size={16} />
+          <div className="flex gap-1.5 sm:gap-2 items-center shrink-0">
+            {myRole === 'creator' ? (
+              <button onClick={handleEndMeeting} disabled={isGeneratingAI} className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-[10px] md:text-sm font-bold text-white shadow-lg transition flex items-center gap-1.5 active:scale-[0.95]">
+                {isGeneratingAI ? <Loader2 className="animate-spin" size={14} /> : <StopCircle size={14} />} <span className="hidden sm:inline">End Meeting</span><span className="sm:hidden">End</span>
               </button>
-
-              <button
-                onClick={leaveMeeting}
-                className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 text-[10px] rounded-xl font-bold text-white hover:bg-white/20 transition"
-              >
-                Leave
-              </button>
-            </div>
-
-            {/* 💻 DESKTOP */}
-            <div className="hidden md:flex items-center gap-2">
-
-              <button
-                onClick={generateAISummary}
-                disabled={isGeneratingAI}
-                className="bg-purple-500/10 text-purple-400 border border-purple-500/40 hover:bg-purple-600 hover:text-white px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 shadow hover:shadow-purple-500/30"
-              >
-                {isGeneratingAI ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
-                <span>AI Summary</span>
-              </button>
-
-              {myRole === 'creator' && (
-                <button
-                  onClick={handleEndMeeting}
-                  disabled={isGeneratingAI}
-                  className="bg-gradient-to-r from-red-500 to-rose-600 px-4 py-2 rounded-xl font-bold hover:from-red-600 hover:to-rose-700 text-white shadow-lg transition active:scale-[0.97]"
-                >
-                  End Meeting
-                </button>
-              )}
-
-              {(myRole === 'creator' || myRole === 'co-host') && (
-                <button
-                  onClick={() => setShowSecurityModal(true)}
-                  className="bg-white/10 backdrop-blur-md border border-white/10 p-2 rounded-xl text-cyan-400 hover:bg-white/20 transition"
-                >
-                  <Shield size={18} />
-                </button>
-              )}
-
-              <button
-                onClick={() => setShowSettingsModal(true)}
-                className="bg-white/10 backdrop-blur-md border border-white/10 p-2 rounded-xl text-slate-300 hover:bg-white/20 transition"
-              >
-                <Settings size={18} />
-              </button>
-
-              <button
-                onClick={leaveMeeting}
-                className="bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 text-sm rounded-xl font-bold text-white hover:bg-white/20 transition ml-2"
-              >
-                Leave Call
-              </button>
-            </div>
-
+            ) : (
+              <button onClick={leaveMeeting} className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 md:px-4 md:py-2 text-[10px] md:text-sm rounded-xl font-bold text-white hover:bg-white/20 transition">Leave</button>
+            )}
+            <button onClick={() => setShowSecurityModal(true)} className="bg-white/10 backdrop-blur-md border border-white/10 p-2 md:p-2.5 rounded-xl text-cyan-400 hover:bg-white/20 transition"><Shield size={16} className="md:w-[18px] md:h-[18px]" /></button>
+            <button onClick={() => setShowSettingsModal(true)} className="bg-white/10 backdrop-blur-md border border-white/10 p-2 md:p-2.5 rounded-xl text-slate-300 hover:bg-white/20 transition"><Settings size={16} className="md:w-[18px] md:h-[18px]" /></button>
           </div>
         </div>
 
-        <div className={`flex-1 flex overflow-hidden pb-[80px] md:pb-24 px-2 md:px-4 gap-3 md:gap-5 min-h-0 ${displayPinnedId ? 'flex-col md:flex-row' : 'flex-col'} backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.6)]`}>
+        <div className={`flex-1 flex overflow-hidden pb-20 md:pb-24 px-2 md:px-4 gap-3 md:gap-5 min-h-0 ${displayPinnedId ? 'flex-col md:flex-row' : 'flex-col'} backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.6)]`}>
           {displayPinnedId === 'local' ? (
             <div className="w-full md:flex-1 h-[60%] md:h-full rounded-2xl shadow-2xl relative cursor-pointer flex-shrink-0 transition-all overflow-hidden" onClick={() => setPinnedUserId(null)}>
               <VideoPlayer stream={myStream || new MediaStream()} name={`${userName} (You)`} profilePic={userProfilePic} isMuted={true} isVideoOff={isVideoOff} isLocal={true} isSpeaking={speakingPeers['local']} isHandRaised={isHandRaised} />
-              <div className="absolute top-3 right-3 bg-black/70 backdrop-blur px-2 py-1 rounded text-xs border border-white/20 z-20">Click to unpin</div>
+              <div className="absolute top-3 right-3 bg-black/70 backdrop-blur px-2 py-1 rounded text-xs border border-white/20 z-20 font-mono">Click to unpin</div>
             </div>
           ) : displayPinnedId === 'local-screen' && localScreenStream ? (
             <div className="w-full md:flex-1 h-[60%] md:h-full rounded-2xl shadow-2xl relative cursor-pointer flex-shrink-0 transition-all overflow-hidden" onClick={() => setPinnedUserId(null)}>
               <VideoPlayer stream={localScreenStream} name={`${userName}'s Presentation`} isMuted={true} isVideoOff={false} isLocal={true} isScreenShare={true} />
-              <div className="absolute top-3 right-3 bg-black/70 backdrop-blur px-2 py-1 rounded text-xs border border-white/20 z-20">Click to unpin</div>
+              <div className="absolute top-3 right-3 bg-black/70 backdrop-blur px-2 py-1 rounded text-xs border border-white/20 z-20 font-mono">Click to unpin</div>
             </div>
           ) : (displayPinnedId && peerNames[displayPinnedId]) ? (
             <div className="w-full md:flex-1 h-[60%] md:h-full rounded-2xl shadow-2xl relative cursor-pointer flex-shrink-0 transition-all overflow-hidden" onClick={() => setPinnedUserId(null)}>
               <VideoPlayer stream={remoteStreams[displayPinnedId] || new MediaStream()} name={peerNames[displayPinnedId] || "Participant"} profilePic={peerPics[displayPinnedId]} isMuted={peerStatus[displayPinnedId]?.isMuted} isVideoOff={peerStatus[displayPinnedId]?.isVideoOff} isSpeaking={speakingPeers[displayPinnedId]} isHandRaised={raisedHands[displayPinnedId]} />
-              <div className="absolute top-3 right-3 bg-black/70 backdrop-blur px-2 py-1 rounded text-xs border border-white/20 z-20">{pinnedUserId ? "Click to unpin" : "Main Stage"}</div>
+              <div className="absolute top-3 right-3 bg-black/70 backdrop-blur px-2 py-1 rounded text-xs border border-white/20 z-20 font-mono">{pinnedUserId ? "Click to unpin" : "Main Stage"}</div>
             </div>
           ) : null}
 
@@ -1551,7 +1104,6 @@ export default function MeetingRoom() {
                 </div>
               );
             })}
-
             {renderedHiddenPeers.map(id => {
               if (id === displayPinnedId) return null;
               return (
@@ -1560,199 +1112,93 @@ export default function MeetingRoom() {
                 </div>
               );
             })}
-
             {remainingHiddenCount > 0 && !displayPinnedId && (
               <div onClick={() => { setShowSidebar(true); setActiveTab('participants'); }} className="cursor-pointer transition-all duration-300 hover:scale-[1.03] w-full h-full relative rounded-2xl overflow-hidden border border-white/10 bg-black/40 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-h-0 min-w-0">
                 <div className="bg-[#020617] h-full w-full relative flex items-center justify-center rounded-2xl overflow-hidden group border-2 border-white/10 shadow-lg">
-                  <div className="h-20 w-20 md:h-24 md:w-24 rounded-full bg-white/5 border-2 border-white/10 flex items-center justify-center font-bold text-slate-300 text-xl md:text-3xl shadow-xl group-hover:bg-white/10 transition-colors">
-                    +{remainingHiddenCount}
-                  </div>
-                  <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 bg-black/80 backdrop-blur-md pl-2 pr-3 py-1.5 rounded-xl text-[10px] md:text-xs font-bold border border-white/10 text-white flex items-center gap-1.5 shadow-lg z-10 uppercase tracking-widest">
-                    <Users size={14} className="text-cyan-400" />
-                    <span>Others</span>
-                  </div>
+                  <div className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 rounded-full bg-white/5 border-2 border-white/10 flex items-center justify-center font-bold text-slate-300 text-xl md:text-3xl shadow-xl group-hover:bg-white/10 transition-colors">+{remainingHiddenCount}</div>
+                  <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 bg-black/80 backdrop-blur-md pl-2 pr-3 py-1.5 rounded-xl text-[10px] md:text-xs font-bold border border-white/10 text-white flex items-center gap-1.5 shadow-lg z-10 uppercase tracking-widest"><Users size={14} className="text-cyan-400" /><span>Others</span></div>
                 </div>
               </div>
             )}
-
             {allPeerIds.length === 0 && !localScreenStream && (
               <div className="col-span-full h-full w-full flex flex-col items-center justify-center text-slate-500 bg-white/5 rounded-2xl border border-white/10 min-h-[200px] backdrop-blur-md">
                 <MonitorUp size={48} className="mb-4 opacity-30 text-cyan-400 animate-pulse" />
-                <p className="text-xs md:text-sm text-center px-4 font-mono tracking-widest opacity-50">SYNCING WORKSPACE: AWAITING NODES...</p>
+                <p className="text-xs md:text-sm text-center px-4 font-mono tracking-widest opacity-50 uppercase">Syncing Workspace: Awaiting Nodes...</p>
               </div>
             )}
           </div>
         </div>
 
         {displayPinnedId !== 'local' && (
-          <div className="absolute bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 md:bottom-28 md:right-8 w-24 h-36 md:w-48 md:h-32 bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-xl border-2 border-slate-700 overflow-hidden shadow-2xl z-20 transition-all">
+          <div className="absolute bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-2 md:bottom-28 md:right-8 w-24 h-32 sm:w-32 sm:h-44 md:w-48 md:h-32 bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-xl border-2 border-slate-700 overflow-hidden z-20 transition-all">
             <VideoPlayer stream={myStream || new MediaStream()} name={`${userName} (You)`} profilePic={userProfilePic} isMuted={isMuted} isVideoOff={isVideoOff} isLocal={true} isSpeaking={speakingPeers['local']} isHandRaised={isHandRaised} />
           </div>
         )}
 
         {liveCaption && captionsEnabled && (
-          <div className="absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-36 left-1/2 -translate-x-1/2 bg-black/80 px-4 py-2 md:px-6 md:py-3 rounded-2xl text-center backdrop-blur-md z-20 border border-white/10 shadow-2xl max-w-[90%] md:max-w-[70%] pointer-events-none">
-            <p className="text-white text-xs md:text-base font-medium leading-relaxed">{liveCaption}</p>
+          <div className="absolute bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-36 left-1/2 -translate-x-1/2 bg-black/80 px-4 py-2 md:px-6 md:py-3 rounded-2xl text-center backdrop-blur-md z-20 border border-white/10 shadow-2xl max-w-[90%] md:max-w-[70%] pointer-events-none">
+            <p className="text-white text-[10px] sm:text-xs md:text-base font-medium leading-relaxed">{liveCaption}</p>
           </div>
         )}
 
-        <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] md:bottom-8 left-1/2 -translate-x-1/2 bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_10px_50px_rgba(0,0,0,0.8)] px-2 py-2 md:px-6 md:py-3 rounded-full flex gap-2 md:gap-4 z-40 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-slate-700 w-max max-w-[95vw] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] items-center">
-
-          <button onClick={toggleMute} className={`p-3 md:p-4 rounded-full transition-all duration-200 shrink-0 ${isMuted ? 'bg-red-500 hover:bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : (myRole === 'guest' && !globalPermissions.mic ? 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 opacity-50 cursor-not-allowed' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 hover:bg-slate-600')}`}>
-            {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
-          </button>
-
-          <button onClick={toggleVideo} className={`p-3 md:p-4 rounded-full transition-all duration-200 shrink-0 ${isVideoOff ? 'bg-red-500 hover:bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : (myRole === 'guest' && !globalPermissions.video ? 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 opacity-50 cursor-not-allowed' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 hover:bg-slate-600')}`}>
-            {isVideoOff ? <VideoOff size={20} /> : <VideoIcon size={20} />}
-          </button>
-
-          <button onClick={toggleRaiseHand} className={`p-3 md:p-4 rounded-full transition-all duration-200 shrink-0 ${isHandRaised ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 hover:bg-slate-600 text-slate-300'}`} title="Raise Hand">
-            <Hand size={20} />
-          </button>
-
-          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`p-3 md:p-4 rounded-full transition-all duration-200 shrink-0 ${showEmojiPicker ? 'bg-blue-600 text-white' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 hover:bg-slate-600 text-slate-300'}`} title="Reactions">
-            <Smile size={20} />
-          </button>
-
-          <button onClick={toggleScreenShare} className={`p-3 md:p-4 rounded-full transition-all duration-200 hidden md:block shrink-0 ${localScreenStream ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : (myRole === 'guest' && !globalPermissions.screen ? 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 opacity-50 cursor-not-allowed' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 hover:bg-slate-600 text-slate-300')}`} title="Present Screen">
-            <MonitorUp size={20} />
-          </button>
-
-          <button
-            onClick={() => {
-              if (myRole === 'guest' && !globalPermissions.record) return alert("Host has disabled recording for participants.");
-              toggleRecording();
-            }}
-            className={`p-3 md:p-4 rounded-full transition-all duration-200 hidden md:block shrink-0 ${isRecording ? 'bg-red-600 hover:bg-red-700 text-white shadow-[0_0_15px_rgba(220,38,38,0.6)] animate-pulse' : (myRole === 'guest' && !globalPermissions.record ? 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 opacity-50 cursor-not-allowed' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 hover:bg-slate-600 text-slate-300')}`}
-            title={isRecording ? "Stop Recording" : "Start Recording"}
+        <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] md:bottom-8 left-1/2 -translate-x-1/2 bg-white/5 backdrop-blur-3xl border border-white/10 shadow-[0_10px_50px_rgba(0,0,0,0.8)] px-2 py-2 md:px-6 md:py-3 rounded-full flex gap-1 sm:gap-2 md:gap-4 z-40 w-max max-w-[98vw] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] items-center transition-all duration-300">
+          <button onClick={toggleMute} className={`p-2 sm:p-3 md:p-4 rounded-full transition-all duration-200 shrink-0 ${isMuted ? 'bg-rose-500 hover:bg-rose-600 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-slate-200'}`} title={isMuted ? "Unmute" : "Mute"}>{isMuted ? <MicOff size={18} /> : <Mic size={18} />}</button>
+          <button onClick={toggleVideo} className={`p-2 sm:p-3 md:p-4 rounded-full transition-all duration-200 shrink-0 ${isVideoOff ? 'bg-rose-500 hover:bg-rose-600 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-slate-200'}`} title={isVideoOff ? "Start Video" : "Stop Video"}>{isVideoOff ? <VideoOff size={18} /> : <VideoIcon size={18} />}</button>
+          <button onClick={toggleRaiseHand} className={`p-2 sm:p-3 md:p-4 rounded-full transition-all duration-200 shrink-0 ${isHandRaised ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-slate-300'}`} title="Raise Hand"><Hand size={18} /></button>
+          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`p-2 sm:p-3 md:p-4 rounded-full transition-all duration-200 shrink-0 ${showEmojiPicker ? 'bg-blue-600 text-white' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-slate-300'}`} title="Reactions"><Smile size={18} /></button>
+          <button onClick={toggleScreenShare} className={`p-2 sm:p-3 md:p-4 rounded-full transition-all duration-200 shrink-0 ${localScreenStream ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-slate-300'}`} title="Present Screen"><MonitorUp size={18} /></button>
+          
+          <button 
+            onClick={() => { if (myRole === 'guest' && !globalPermissions.record) return alert("Host has disabled recording."); if (isRecording) { toggleRecording(); } else { setShowRecordModal(true); } }} 
+            className={`p-2 sm:p-3 md:p-4 rounded-full transition-all duration-200 shrink-0 relative group/record ${isRecording ? 'bg-rose-600/90 shadow-[0_0_20px_rgba(225,29,72,0.6)]' : (myRole === 'guest' && !globalPermissions.record ? 'bg-white/10 opacity-50 cursor-not-allowed' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-slate-300 hover:text-rose-500')}`} 
+            title={isRecording ? "Stop Recording" : "Record Session"}
           >
-            {isRecording ? <StopCircle size={20} /> : <Circle size={20} />}
+            {isRecording ? (
+              <div className="relative flex items-center justify-center">
+                <StopCircle size={18} className="text-white relative z-10" />
+                <div className="absolute inset-0 bg-white/20 rounded-full record-pulse" />
+              </div>
+            ) : (
+              <Circle size={18} className="group-hover/record:fill-rose-500/20 transition-all" />
+            )}
           </button>
+          
+          <div className="w-px h-6 md:h-8 bg-white/10 mx-1 shrink-0" />
+          
+          <button onClick={() => { setShowSidebar(!showSidebar); setActiveTab('chat'); }} className={`md:hidden p-2 sm:p-3 rounded-full transition-all shrink-0 relative ${showSidebar ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 backdrop-blur-md border border-white/10 text-slate-300'}`} title="Meeting Sidebar"><MessageSquare size={18} />{(joinRequests.length > 0) && (<span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[7px] h-3.5 w-3.5 flex items-center justify-center rounded-full border border-slate-900 animate-pulse">!</span>)}</button>
 
-          <div className="w-px h-8 bg-slate-600 mx-0.5 md:mx-2 shrink-0"></div>
-
-          <button onClick={() => { setShowSidebar(!showSidebar); setActiveTab('chat'); }} className={`p-3 md:p-4 rounded-full transition-all shrink-0 md:hidden block ${showSidebar && activeTab === 'chat' ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 hover:bg-slate-600 text-slate-300'}`}>
-            <MessageSquare size={20} />
-          </button>
-
-          <button onClick={() => { setShowSidebar(!showSidebar); setActiveTab('chat'); }} className={`p-3 md:p-4 rounded-full transition-all hidden md:block shrink-0 ${showSidebar && activeTab === 'chat' ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 hover:bg-slate-600'}`}>
-            <MessageSquare size={20} />
-          </button>
-
-          <button onClick={() => { setShowSidebar(!showSidebar); setActiveTab('participants'); }} className={`p-3 md:p-4 rounded-full transition-all hidden md:block shrink-0 relative ${showSidebar && activeTab === 'participants' ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 hover:bg-slate-600'}`}>
-            <Users size={20} />
-            {joinRequests.length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] h-5 w-5 flex items-center justify-center rounded-full border-2 border-slate-900">{joinRequests.length}</span>}
-          </button>
-
-          <button onClick={() => { setShowSidebar(!showSidebar); setActiveTab('notes'); }} className={`p-3 md:p-4 rounded-full transition-all hidden md:block shrink-0 relative ${showSidebar && activeTab === 'notes' ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 hover:bg-slate-600'}`}>
-            <FileText size={20} />
-          </button>
+          <button onClick={() => { setShowSidebar(!showSidebar); setActiveTab('chat'); }} className={`hidden md:flex p-2 sm:p-3 md:p-4 rounded-full transition-all shrink-0 ${showSidebar && activeTab === 'chat' ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 backdrop-blur-md border border-white/10 text-slate-300'}`} title="Chat"><MessageSquare size={18} /></button>
+          <button onClick={() => { setShowSidebar(!showSidebar); setActiveTab('participants'); }} className={`hidden md:flex p-2 sm:p-3 md:p-4 rounded-full transition-all shrink-0 relative ${showSidebar && activeTab === 'participants' ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 backdrop-blur-md border border-white/10 text-slate-300'}`} title="Participants"><Users size={18} />{joinRequests.length > 0 && <span className="absolute top-1 right-1 bg-red-500 text-white text-[8px] h-4 w-4 flex items-center justify-center rounded-full border-2 border-slate-900">{joinRequests.length}</span>}</button>
+          <button onClick={() => { setShowSidebar(!showSidebar); setActiveTab('notes'); }} className={`hidden md:flex p-2 sm:p-3 md:p-4 rounded-full transition-all shrink-0 ${showSidebar && activeTab === 'notes' ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 backdrop-blur-md border border-white/10 text-slate-300'}`} title="Notes"><FileText size={18} /></button>
         </div>
       </div>
 
-
-      {/*Meeting Sidebar*/}
-      <div className={`${showSidebar ? 'translate-x-0' : 'translate-x-full'} fixed top-0 right-0 h-[100dvh] w-full md:w-[350px] bg-white/5 backdrop-blur-2xl border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] flex flex-col transition-transform duration-300 ease-in-out`}>
+      <div className={`${showSidebar ? 'translate-x-0' : 'translate-x-full'} fixed top-0 right-0 h-[100dvh] w-full md:w-[350px] bg-[#020617]/95 backdrop-blur-3xl border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] flex flex-col transition-transform duration-300 ease-in-out`}>
         <div className="flex items-center justify-between p-3 border-b border-white/10 bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl">
           <div className="flex gap-1 w-full bg-white/5 p-1 rounded-xl">
-            <button onClick={() => setActiveTab('chat')} className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-colors ${activeTab === 'chat' ? 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Chat</button>
-            <button onClick={() => setActiveTab('participants')} className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-colors relative ${activeTab === 'participants' ? 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-white shadow' : 'text-slate-400 hover:text-white'}`}>
-              People ({Object.keys(peerNames).length + 1})
-              {joinRequests.length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] h-4 w-4 flex items-center justify-center rounded-full">{joinRequests.length}</span>}
-            </button>
-            <button onClick={() => setActiveTab('notes')} className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-colors ${activeTab === 'notes' ? 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Notes</button>
+            <button onClick={() => setActiveTab('chat')} className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${activeTab === 'chat' ? 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Chat</button>
+            <button onClick={() => setActiveTab('participants')} className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all relative ${activeTab === 'participants' ? 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-white shadow' : 'text-slate-400 hover:text-white'}`}>People ({Object.keys(peerNames).length + 1}) {joinRequests.length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] h-4 w-4 flex items-center justify-center rounded-full">{joinRequests.length}</span>}</button>
+            <button onClick={() => setActiveTab('notes')} className={`flex-1 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${activeTab === 'notes' ? 'bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Notes</button>
           </div>
-          <button onClick={() => setShowSidebar(false)} className="ml-3 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/10 p-2 rounded-xl transition-colors">
-            <X size={18} />
-          </button>
+          <button onClick={() => setShowSidebar(false)} className="ml-3 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 p-2 rounded-xl transition-all"><X size={18} /></button>
         </div>
 
-        {/* ================= CHAT ================= */}
         {activeTab === 'chat' && (
-          <div className="flex-1 flex flex-col bg-transparent min-h-0 overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-6 custom-scrollbar">
               {messages.length === 0 ? (
-                <div className="text-center flex flex-col items-center justify-center h-full text-slate-500">
-                  <div className="relative mb-4">
-                    <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-full animate-pulse" />
-                    <MessageSquare size={48} className="relative z-10 opacity-40 text-cyan-400" />
-                  </div>
-                  <p className="text-sm font-bold uppercase tracking-[0.2em] opacity-50">Secure Channel Empty</p>
-                </div>
+                <div className="text-center flex flex-col items-center justify-center h-full text-slate-500"><div className="relative mb-4"><div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-full animate-pulse" /><MessageSquare size={48} className="relative z-10 opacity-40 text-cyan-400" /></div><p className="text-sm font-bold uppercase tracking-[0.2em] opacity-50 font-mono">Secure Channel Empty</p></div>
               ) : (
                 messages.map((m, i) => {
                   const isMe = m.sender === userName;
                   const isFile = m.text.startsWith('DATA_FILE:');
-
-                  // CRASH FIX: Safely extract and parse JSON data
                   let fileData: any = null;
-                  if (isFile) {
-                    try {
-                      const jsonString = m.text.substring(10); // Using substring is faster than replace
-                      fileData = JSON.parse(jsonString);
-                    } catch (e) {
-                      console.error("Failed to parse message data:", e);
-                    }
-                  }
-
+                  if (isFile) { try { fileData = JSON.parse(m.text.substring(10)); } catch (e) { console.error("Parse error:", e); } }
                   return (
                     <div key={i} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full animate-in fade-in slide-in-from-bottom-2 duration-300`}>
-                      <div className={`flex items-center gap-2 mb-1.5 px-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${isMe ? 'text-cyan-400' : 'text-teal-400'}`}>
-                          {isMe ? 'You' : m.sender}
-                        </span>
-                        <span className="text-[8px] text-slate-600 font-mono">{m.time}</span>
-                      </div>
-
-                      <div
-                        className={`group relative p-3 text-sm break-words transition-all duration-300 shadow-2xl
-                ${isMe
-                            ? 'bg-gradient-to-br from-cyan-500 to-teal-500 text-black rounded-2xl rounded-tr-sm'
-                            : 'bg-white/5 border border-white/10 text-slate-200 rounded-2xl rounded-tl-sm backdrop-blur-xl'}`}
-                        style={{ maxWidth: '85%' }}
-                      >
-                        {isFile ? (
-                          fileData ? (
-                            <div className="space-y-2 min-w-[140px]">
-                              {fileData.type?.startsWith('image/') ? (
-                                <div className="relative rounded-lg overflow-hidden border border-black/10 max-h-64 bg-black/20">
-                                  <img
-                                    src={fileData.content}
-                                    alt="shared"
-                                    className="max-w-full h-auto object-contain mx-auto"
-                                    loading="lazy"
-                                  />
-                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <a href={fileData.content} download={fileData.name} className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:scale-110 transition">
-                                      <Download size={18} />
-                                    </a>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-3 bg-black/20 p-3 rounded-lg border border-white/5">
-                                  <div className="p-2 bg-white/10 rounded-md">
-                                    <FileText size={20} className={isMe ? "text-black" : "text-cyan-400"} />
-                                  </div>
-                                  <div className="flex-1 overflow-hidden">
-                                    <p className="text-[10px] font-bold truncate">{fileData.name}</p>
-                                    <p className="text-[8px] opacity-60 uppercase">
-                                      {(fileData.size / (1024 * 1024)).toFixed(2)} MB
-                                    </p>
-                                  </div>
-                                  <a href={fileData.content} download={fileData.name} className={`p-1.5 rounded-md hover:bg-white/10 transition-colors ${isMe ? "text-black" : "text-white"}`}>
-                                    <Download size={16} />
-                                  </a>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2 italic text-xs opacity-50">
-                              <Loader2 size={12} className="animate-spin" /> Corrupted data or processing...
-                            </div>
-                          )
-                        ) : (
-                          <p className="leading-relaxed font-medium">{m.text}</p>
-                        )}
+                      <div className={`flex items-center gap-2 mb-1.5 px-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}><span className={`text-[10px] font-black uppercase tracking-widest ${isMe ? 'text-cyan-400' : 'text-teal-400'}`}>{isMe ? 'You' : m.sender}</span><span className="text-[8px] text-slate-600 font-mono">{m.time}</span></div>
+                      <div className={`group relative p-3 text-sm break-words transition-all duration-300 shadow-2xl ${isMe ? 'bg-gradient-to-br from-cyan-500 to-teal-500 text-black rounded-2xl rounded-tr-sm' : 'bg-white/5 border border-white/10 text-slate-200 rounded-2xl rounded-tl-sm backdrop-blur-xl'}`} style={{ maxWidth: '85%' }}>
+                        {isFile ? (fileData ? <div className="space-y-2 min-w-[140px]">{fileData.type?.startsWith('image/') ? <div className="relative rounded-lg overflow-hidden border border-black/10 max-h-64 bg-black/20"><img src={fileData.content} alt="shared" className="max-w-full h-auto object-contain mx-auto" /><div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><a href={fileData.content} download={fileData.name} className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:scale-110 transition-all"><Download size={18} /></a></div></div> : <div className="flex items-center gap-3 bg-black/20 p-3 rounded-lg border border-white/5"><div className="p-2 bg-white/10 rounded-md"><FileText size={20} className={isMe ? "text-black" : "text-cyan-400"} /></div><div className="flex-1 overflow-hidden"><p className="text-[10px] font-bold truncate">{fileData.name}</p><p className="text-[8px] opacity-60 uppercase">{(fileData.size / (1024 * 1024)).toFixed(2)} MB</p></div><a href={fileData.content} download={fileData.name} className={`p-1.5 rounded-md hover:bg-white/10 transition-colors ${isMe ? "text-black" : "text-white"}`}><Download size={16} /></a></div>}</div> : <div className="flex items-center gap-2 italic text-xs opacity-50"><Loader2 size={12} className="animate-spin" /> Corrupted data...</div>) : <p className="leading-relaxed font-medium">{m.text}</p>}
                       </div>
                     </div>
                   );
@@ -1760,364 +1206,51 @@ export default function MeetingRoom() {
               )}
               <div ref={messagesEndRef} className="h-2" />
             </div>
-
-            {/* INPUT SECTION */}
             <div className="p-4 border-t border-white/10 bg-white/5 backdrop-blur-2xl">
-              <form onSubmit={sendMessage} className="flex gap-2 items-center bg-black/40 border border-white/10 rounded-2xl p-1.5 pr-2 focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all">
-
-                <label className="p-2.5 text-slate-500 hover:text-cyan-400 cursor-pointer transition-colors hover:bg-white/5 rounded-xl">
-                  <Plus size={20} />
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*,application/pdf,.doc,.docx"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        // 100MB Limit check
-                        if (file.size > 100 * 1024 * 1024) return alert("File too large! Max 100MB allowed.");
-
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                          try {
-                            const payload = {
-                              name: file.name,
-                              type: file.type,
-                              size: file.size,
-                              content: reader.result
-                            };
-
-                            // Small timeout prevents the UI from freezing during socket emit
-                            setTimeout(() => {
-                              socket?.emit('send-message', {
-                                roomId,
-                                text: `DATA_FILE:${JSON.stringify(payload)}`,
-                                sender: userName
-                              });
-                            }, 100);
-
-                          } catch (err) {
-                            console.error("Memory Buffer Overflow during stringify", err);
-                            alert("System Memory full. Try a smaller file.");
-                          }
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                      // CRITICAL: Reset input value so user can select the same file again if needed
-                      e.target.value = '';
-                    }}
-                  />
-                </label>
-
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={handleTyping}
-                  placeholder="Send matrix log..."
-                  className="flex-1 bg-transparent px-2 py-3 text-sm text-white placeholder:text-slate-600 outline-none font-mono"
-                />
-
-                <button
-                  type="submit"
-                  disabled={!chatInput.trim()}
-                  className="bg-gradient-to-r from-cyan-500 to-teal-400 disabled:opacity-30 p-3 rounded-xl text-black hover:scale-105 active:scale-95 transition-all shadow-lg"
-                >
-                  <Send size={18} />
-                </button>
-              </form>
+              <form onSubmit={sendMessage} className="flex gap-2 items-center bg-black/40 border border-white/10 rounded-2xl p-1.5 pr-2 focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all"><label className="p-2.5 text-slate-500 hover:text-cyan-400 cursor-pointer transition-colors hover:bg-white/5 rounded-xl"><Plus size={20} /><input type="file" className="hidden" accept="image/*,application/pdf,.doc,.docx" onChange={(e) => { const file = e.target.files?.[0]; if (file) { if (file.size > 100 * 1024 * 1024) return alert("File too large! Max 100MB."); const reader = new FileReader(); reader.onload = () => { try { const payload = { name: file.name, type: file.type, size: file.size, content: reader.result }; setTimeout(() => { socket?.emit('send-message', { roomId, text: `DATA_FILE:${JSON.stringify(payload)}`, sender: userName }); }, 100); } catch (err) { alert("Memory Buffer Overflow. Try a smaller file."); } }; reader.readAsDataURL(file); } e.target.value = ''; }} /></label><input type="text" value={chatInput} onChange={handleTyping} placeholder="Send matrix log..." className="flex-1 bg-transparent px-2 py-3 text-sm text-white placeholder:text-slate-600 outline-none font-mono" /><button type="submit" disabled={!chatInput.trim()} className="bg-gradient-to-r from-cyan-500 to-teal-400 disabled:opacity-30 p-3 rounded-xl text-black hover:scale-105 active:scale-95 transition-all shadow-lg"><Send size={18} /></button></form>
             </div>
           </div>
         )}
 
-        {/* ================= PARTICIPANTS ================= */}
         {activeTab === 'participants' && (
           <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
-
-            {/* 1. WAITING ROOM (Host only) */}
             {(myRole === 'creator' || myRole === 'co-host') && joinRequests.length > 0 && (
               <div className="mb-6">
-                <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em] mb-3 px-1 flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-                  Waiting Room ({joinRequests.length})
-                </h4>
+                <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em] mb-3 px-1 flex items-center gap-2"><div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />Waiting Room ({joinRequests.length})</h4>
                 {joinRequests.map(req => (
-                  <div key={req.socketId} className="bg-white/5 border border-amber-500/20 p-3 rounded-xl mb-2 flex justify-between items-center backdrop-blur-xl">
-                    <span className="text-sm font-bold text-slate-200 truncate pr-2">{req.userName}</span>
-                    <div className="flex gap-1.5">
-                      <button onClick={() => { socket?.emit('accept-join', { targetSocketId: req.socketId, targetUserId: req.targetUserId, roomId }); setJoinRequests(prev => prev.filter(r => r.socketId !== req.socketId)); }} className="bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white p-1.5 rounded-lg transition-all"><Check size={16} /></button>
-                      <button onClick={() => { socket?.emit('reject-join', { targetSocketId: req.socketId }); setJoinRequests(prev => prev.filter(r => r.socketId !== req.socketId)); }} className="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white p-1.5 rounded-lg transition-all"><X size={16} /></button>
-                    </div>
-                  </div>
+                  <div key={req.socketId} className="bg-white/5 border border-amber-500/20 p-3 rounded-xl mb-2 flex justify-between items-center backdrop-blur-xl"><span className="text-sm font-bold text-slate-200 truncate pr-2">{req.userName}</span><div className="flex gap-1.5"><button onClick={() => { socket?.emit('accept-join', { targetSocketId: req.socketId, targetUserId: req.targetUserId, roomId }); setJoinRequests(prev => prev.filter(r => r.socketId !== req.socketId)); }} className="bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white p-1.5 rounded-lg transition-all"><Check size={16} /></button><button onClick={() => { socket?.emit('reject-join', { targetSocketId: req.socketId }); setJoinRequests(prev => prev.filter(r => r.socketId !== req.socketId)); }} className="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white p-1.5 rounded-lg transition-all"><X size={16} /></button></div></div>
                 ))}
               </div>
             )}
-
-            <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.2em] mb-3 px-1">
-              In Meeting
-            </h4>
-
+            <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.2em] mb-3 px-1">In Meeting</h4>
             <div className="space-y-2">
-              {/* 2. LOCAL USER (YOU) - CLICKABLE FIXED */}
               <div className="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/20 shadow-lg group">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)] flex-shrink-0">
-                    {userProfilePic
-                      ? <img src={userProfilePic} className="h-full w-full object-cover" alt="You" />
-                      : <div className="flex items-center justify-center h-full bg-slate-800 font-bold text-cyan-400">{userName.charAt(0)}</div>
-                    }
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm font-bold text-white truncate">{userName} (You)</span>
-                    <span className="text-[9px] text-cyan-400 font-black uppercase tracking-tighter">{myRole === 'creator' ? 'Host' : myRole}</span>
-                  </div>
-                </div>
-
-                {/* MEDIA CONTROLS FOR SELF */}
-                <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                  <button
-                    onClick={toggleMute}
-                    className={`p-1.5 rounded-lg transition-all ${isMuted ? 'bg-rose-500/20 text-rose-500' : 'hover:bg-white/10 text-emerald-500'}`}
-                    title={isMuted ? "Unmute" : "Mute"}
-                  >
-                    {isMuted ? <MicOff size={16} /> : <Mic size={16} />}
-                  </button>
-
-                  <button
-                    onClick={toggleVideo}
-                    className={`p-1.5 rounded-lg transition-all ${isVideoOff ? 'bg-rose-500/20 text-rose-500' : 'hover:bg-white/10 text-cyan-400'}`}
-                    title={isVideoOff ? "Start Video" : "Stop Video"}
-                  >
-                    {isVideoOff ? <VideoOff size={16} /> : <VideoIcon size={16} />}
-                  </button>
-
-                  <div className="w-px h-4 bg-white/10 mx-0.5" />
-
-                  <button
-                    onClick={() => setPinnedUserId(pinnedUserId === 'local' ? null : 'local')}
-                    className={`p-1.5 rounded-lg transition-all ${pinnedUserId === 'local' ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-500 hover:text-white'}`}
-                  >
-                    <Pin size={16} />
-                  </button>
-                </div>
+                <div className="flex items-center gap-3 min-w-0"><div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)] flex-shrink-0">{userProfilePic ? <img src={userProfilePic} className="h-full w-full object-cover" alt="You" /> : <div className="flex items-center justify-center h-full bg-slate-800 font-bold text-cyan-400">{userName.charAt(0)}</div>}</div><div className="flex flex-col min-w-0"><span className="text-sm font-bold text-white truncate">{userName} (You)</span><span className="text-[9px] text-cyan-400 font-black uppercase tracking-tighter font-mono">{myRole === 'creator' ? 'Host' : myRole}</span></div></div>
+                <div className="flex items-center gap-1.5 flex-shrink-0 ml-2"><button onClick={toggleMute} className={`p-1.5 rounded-lg transition-all ${isMuted ? 'bg-rose-500/20 text-rose-500' : 'hover:bg-white/10 text-emerald-500'}`}>{isMuted ? <MicOff size={16} /> : <Mic size={16} />}</button><button onClick={toggleVideo} className={`p-1.5 rounded-lg transition-all ${isVideoOff ? 'bg-rose-500/20 text-rose-500' : 'hover:bg-white/10 text-cyan-400'}`}>{isVideoOff ? <VideoOff size={16} /> : <VideoIcon size={16} />}</button><div className="w-px h-4 bg-white/10 mx-0.5" /><button onClick={() => setPinnedUserId(pinnedUserId === 'local' ? null : 'local')} className={`p-1.5 rounded-lg transition-all ${pinnedUserId === 'local' ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-500 hover:text-white'}`}><Pin size={16} /></button></div>
               </div>
-
-              {/* 3. REMOTE PARTICIPANTS (Indicators only as we can't force-mute others without extra socket logic) */}
               {sortedPeerIds.map(id => {
                 const role = roomRoles[id] || 'guest';
                 const isTargetCreator = role === 'creator';
-                const canToggleCoHost = myRole === 'creator' && !isTargetCreator;
-                const canKick = (myRole === 'creator' && !isTargetCreator) || (myRole === 'co-host' && role === 'guest');
-
                 return (
-                  <div key={id} className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-300 ${speakingPeers[id] ? 'bg-cyan-500/5 border-cyan-500/30' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}>
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={`relative h-10 w-10 rounded-full overflow-hidden border flex-shrink-0 transition-all ${speakingPeers[id] ? 'border-cyan-400 animate-pulse' : 'border-white/10'}`}>
-                        {peerPics[id]
-                          ? <img src={peerPics[id]} className="h-full w-full object-cover" alt="User" />
-                          : <div className="flex items-center justify-center h-full bg-slate-800 font-bold text-slate-400">{peerNames[id]?.charAt(0)}</div>
-                        }
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className={`text-sm font-medium truncate ${speakingPeers[id] ? 'text-cyan-300' : 'text-slate-200'}`}>{peerNames[id]}</span>
-                        {role !== 'guest' && <span className={`text-[9px] font-black uppercase tracking-tighter ${role === 'creator' ? 'text-blue-400' : 'text-amber-400'}`}>{role}</span>}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                      {/* Visual indicators for others */}
-                      <div className="p-1.5">
-                        {peerStatus[id]?.isMuted ? <MicOff size={16} className="text-rose-500/70" /> : <Mic size={16} className="text-emerald-500/70" />}
-                      </div>
-
-                      <div className="w-px h-4 bg-white/10 mx-1" />
-
-                      <button onClick={() => setPinnedUserId(pinnedUserId === id ? null : id)} className={`p-1.5 rounded-lg transition-all ${pinnedUserId === id ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-500 hover:text-white'}`}>
-                        <Pin size={16} />
-                      </button>
-
-                      {canToggleCoHost && (
-                        <button onClick={() => socket?.emit(role === 'co-host' ? 'remove-cohost' : 'make-cohost', { targetSocketId: id, roomId })} className="p-1.5 text-slate-500 hover:text-amber-400 transition-all" title="Toggle Co-Host">
-                          <Star size={16} />
-                        </button>
-                      )}
-                      {canKick && (
-                        <button onClick={() => socket?.emit('kick-user', { targetSocketId: id, targetUserId: id, roomId })} className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-md transition-all">
-                          <UserMinus size={16} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                  <div key={id} className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-300 ${speakingPeers[id] ? 'bg-cyan-500/5 border-cyan-500/30' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}><div className="flex items-center gap-3 min-w-0"><div className={`relative h-10 w-10 rounded-full overflow-hidden border flex-shrink-0 transition-all ${speakingPeers[id] ? 'border-cyan-400 animate-pulse' : 'border-white/10'}`}>{peerPics[id] ? <img src={peerPics[id]} className="h-full w-full object-cover" alt="User" /> : <div className="flex items-center justify-center h-full bg-slate-800 font-bold text-slate-400">{peerNames[id]?.charAt(0)}</div>}</div><div className="flex flex-col min-w-0"><span className={`text-sm font-medium truncate ${speakingPeers[id] ? 'text-cyan-300' : 'text-slate-200'}`}>{peerNames[id]}</span>{role !== 'guest' && <span className={`text-[9px] font-black uppercase tracking-tighter font-mono ${role === 'creator' ? 'text-blue-400' : 'text-amber-400'}`}>{role}</span>}</div></div><div className="flex items-center gap-1 flex-shrink-0 ml-2"><div className="p-1.5">{peerStatus[id]?.isMuted ? <MicOff size={16} className="text-rose-500/70" /> : <Mic size={16} className="text-emerald-500/70" />}</div><div className="w-px h-4 bg-white/10 mx-1" /><button onClick={() => setPinnedUserId(pinnedUserId === id ? null : id)} className={`p-1.5 rounded-lg transition-all ${pinnedUserId === id ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-500 hover:text-white'}`}><Pin size={16} /></button>{myRole === 'creator' && !isTargetCreator && <button onClick={() => socket?.emit(role === 'co-host' ? 'remove-cohost' : 'make-cohost', { targetSocketId: id, roomId })} className="p-1.5 text-slate-500 hover:text-amber-400 transition-all"><Star size={16} /></button>}{( (myRole === 'creator' && !isTargetCreator) || (myRole === 'co-host' && role === 'guest') ) && <button onClick={() => socket?.emit('kick-user', { targetSocketId: id, targetUserId: id, roomId })} className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-md transition-all"><UserMinus size={16} /></button>}</div></div>
                 );
               })}
             </div>
           </div>
         )}
 
-        {/* ================= NOTES ================= */}
         {activeTab === 'notes' && (
-          <div className="flex-1 flex flex-col bg-transparent p-3 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-[calc(1rem+env(safe-area-inset-bottom))]">
-
-            {/* <div className="flex flex-col h-1/2 mb-4">
-              <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center gap-2"><FileText size={14} /> Live Shared Notes</h4>
-              <textarea
-                value={sharedNotes}
-                onChange={handleNotesChange}
-                disabled={myRole === 'guest' && !globalPermissions.notes}
-                placeholder={myRole === 'guest' && !globalPermissions.notes ? "Host disabled typing in shared notes." : "Type here... Everyone in the meeting can see and edit this document in real-time."}
-                className="flex-1 w-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl border border-slate-700 rounded-xl p-3 text-sm text-slate-200 outline-none focus:border-blue-500 resize-none transition-colors shadow-inner disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <p className="text-[10px] text-slate-500 mt-1 italic font-mono tracking-widest uppercase opacity-60">Neural Sync: Enabled</p>
-            </div> */}
-
-
-            {/* Shared Notes */}
-            <div className="flex flex-col h-1/2 mb-4">
-              <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                <FileText size={14} /> Live Shared Notes
-              </h4>
-              <textarea
-                value={sharedNotes}
-                onChange={handleNotesChange}
-                disabled={myRole === 'guest' && !globalPermissions.notes}
-                placeholder={myRole === 'guest' && !globalPermissions.notes ? "Host disabled typing in shared notes." : "Type here... Everyone in the meeting can see and edit this document in real-time."}
-                className="flex-1 w-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl border-slate-700 rounded-xl p-3 text-sm text-slate-200 outline-none focus:border-cyan-500 resize-none transition-colors shadow-inner disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <p className="text-[10px] text-slate-500 mt-1 italic font-mono tracking-widest uppercase opacity-60">Neural_Sync: Enabled</p>
-            </div>
-
-            <div className="w-full h-px bg-white/10 my-2"></div>
-
-
-
-
-            {/* Tasks Section */}
-            <div className="flex flex-col flex-1 min-h-[200px]">
-              <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                <CheckSquare size={14} />
-                Action Items
-              </h4>
-
-              <form onSubmit={handleAddTask} className="flex flex-col gap-2 mb-3">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newTaskInput}
-                    onChange={(e) => setNewTaskInput(e.target.value)}
-                    disabled={myRole === 'guest' && !globalPermissions.tasks}
-                    placeholder={myRole === 'guest' && !globalPermissions.tasks ? "Task creation disabled by host." : "Add a new task..."}
-                    className="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  />
-                  <button type="submit" disabled={!newTaskInput.trim() || (myRole === 'guest' && !globalPermissions.tasks)} className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-2 rounded-lg transition-colors flex items-center justify-center">
-                    <Plus size={16} />
-                  </button>
-                </div>
-
-                <div className="relative w-full">
-
-
-
-                  <select
-                    value={selectedAssignee}
-                    onChange={(e) => setSelectedAssignee(e.target.value)}
-                    disabled={myRole === 'guest' && !globalPermissions.tasks}
-                    className="w-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none focus:border-cyan-500 disabled:opacity-50 appearance-none cursor-pointer"
-                  >
-                    <option value="unassigned" className='bg-[#0f172a]'>Assign to (Optional)</option>
-                    <option value="local" className='bg-[#0f172a]'>{userName} (You)</option>
-                    {Object.keys(peerNames).map(id => (
-                      <option key={id} value={id} className='bg-[#0f172a]'>{peerNames[id]}</option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                    <ChevronDown size={16} />
-                  </div>
-                </div>
-
-              </form>
-
-              {/* Task List
-              <div className="flex-1 overflow-y-auto space-y-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                {meetingTasks.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-50 font-mono tracking-widest uppercase">
-                    <CheckSquare size={32} className="mb-2 opacity-20" />
-                    <span className="text-[10px]">Registry_Empty</span>
-                  </div>
-                ) : (
-                  meetingTasks.map((task) => (
-                    <div key={task.id} className="bg-white/5 border border-white/10 p-2.5 rounded-xl flex flex-col shadow-lg backdrop-blur-xl">
-                      <div className="flex justify-between items-start">
-                        <span className="text-sm text-slate-200">{task.text}</span>
-                        {task.assigneeName && task.assigneeName !== 'Unassigned' && (
-                          <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 whitespace-nowrap ml-2">
-                            @ {task.assigneeName}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[9px] text-slate-500 mt-1 uppercase font-mono">Origin: {task.creator}</span>
-                    </div>
-                  ))
-                )}
-              </div> */}
-
-              {/* Task List */}
-              <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
-                {meetingTasks.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-50 font-mono tracking-widest uppercase">
-                    <CheckSquare size={32} className="mb-2 opacity-20" />
-                    <span className="text-[10px]">Registry_Empty</span>
-                  </div>
-                ) : (
-                  meetingTasks.map((task) => {
-                    {/* 🧠 Logic for "You" vs "Username" */ }
-                    const isAssignedToMe = task.assigneeId === userIdStore || task.assigneeId === 'local' || task.assigneeName === userName;
-                    const displayAssignee = isAssignedToMe ? "You" : task.assigneeName;
-
-                    return (
-                      <div key={task.id} className="bg-white/5 border border-white/10 p-3 rounded-xl flex flex-col shadow-lg backdrop-blur-xl hover:border-cyan-500/30 transition-all group">
-                        <div className="flex justify-between items-start">
-                          <span className="text-sm text-slate-200 font-medium">{task.text}</span>
-                          {task.assigneeName && task.assigneeName !== 'Unassigned' && (
-                            <span className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap ml-2 transition-all ${isAssignedToMe
-                              ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30 shadow-[0_0_8px_rgba(34,211,238,0.2)]'
-                              : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-                              }`}>
-                              @ {displayAssignee}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-[9px] text-slate-500 uppercase font-mono tracking-tighter">
-                            Origin: <span className="text-slate-400">{task.creator === userName ? 'You' : task.creator}</span>
-                          </span>
-                          <span className="text-[8px] font-mono text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity uppercase">Task_ID_{task.id.slice(-4)}</span>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-
-
-            </div>
+          <div className="flex-1 flex flex-col bg-transparent p-3 overflow-y-auto custom-scrollbar pb-24 md:pb-24">
+            <div className="flex flex-col h-1/2 mb-4 shrink-0"><h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center gap-2"><FileText size={14} /> Live Shared Notes</h4><textarea value={sharedNotes} onChange={handleNotesChange} disabled={myRole === 'guest' && !globalPermissions.notes} placeholder={myRole === 'guest' && !globalPermissions.notes ? "Host disabled notes." : "Type here... Real-time shared workspace."} className="flex-1 w-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl border-slate-700 rounded-xl p-3 text-sm text-slate-200 outline-none focus:border-cyan-500 resize-none transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-inner" /><p className="text-[10px] text-slate-500 mt-1 italic font-mono tracking-widest uppercase opacity-60">Neural_Sync: Enabled</p></div>
+            <div className="w-full h-px bg-white/10 my-2 shrink-0"></div>
+            <div className="flex flex-col flex-1 min-h-[200px]"><h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center gap-2"><CheckSquare size={14} /> Action Items</h4><form onSubmit={handleAddTask} className="flex flex-col gap-2 mb-3"><div className="flex gap-2"><input type="text" value={newTaskInput} onChange={(e) => setNewTaskInput(e.target.value)} disabled={myRole === 'guest' && !globalPermissions.tasks} placeholder="Add a new task..." className="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500 disabled:opacity-50" /><button type="submit" disabled={!newTaskInput.trim() || (myRole === 'guest' && !globalPermissions.tasks)} className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-2 rounded-lg transition-all"><Plus size={16} /></button></div><div className="relative w-full"><select value={selectedAssignee} onChange={(e) => setSelectedAssignee(e.target.value)} disabled={myRole === 'guest' && !globalPermissions.tasks} className="w-full bg-[#020617] backdrop-blur-xl border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none focus:border-cyan-500 disabled:opacity-50 appearance-none cursor-pointer"><option value="unassigned" className='bg-[#0f172a]'>Assign to (Optional)</option><option value="local" className='bg-[#0f172a]'>{userName} (You)</option>{Object.keys(peerNames).map(id => (<option key={id} value={id} className='bg-[#0f172a]'>{peerNames[id]}</option>))}</select><div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><ChevronDown size={16} /></div></div></form><div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">{meetingTasks.length === 0 ? <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-50 font-mono tracking-widest uppercase"><CheckSquare size={32} className="mb-2 opacity-20" /><span className="text-[10px]">Registry_Empty</span></div> : meetingTasks.map((task) => { const isAssignedToMe = task.assigneeId === userIdStore || task.assigneeId === 'local' || task.assigneeName === userName; return (<div key={task.id} className="bg-white/5 border border-white/10 p-3 rounded-xl flex flex-col shadow-lg hover:border-cyan-500/30 transition-all group"><div className="flex justify-between items-start"><span className="text-sm text-slate-200 font-medium">{task.text}</span>{task.assigneeName && task.assigneeName !== 'Unassigned' && <span className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap ml-2 transition-all ${isAssignedToMe ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30'}`}>@ {isAssignedToMe ? "You" : task.assigneeName}</span>}</div><div className="flex items-center justify-between mt-2"><span className="text-[9px] text-slate-500 uppercase font-mono tracking-tighter">Origin: <span className="text-slate-400">{task.creator === userName ? 'You' : task.creator}</span></span><span className="text-[8px] font-mono text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">ID_{task.id.slice(-4)}</span></div></div>); })}</div></div>
           </div>
         )}
-
-
       </div>
 
       <div className="fixed inset-0 pointer-events-none z-[1000] overflow-hidden">
-        {floatingEmojis.map(emoji => (
-          <div
-            key={emoji.id}
-            className="absolute bottom-24 text-5xl emoji-float"
-            style={{ left: `${emoji.left}%` }}
-          >
-            {emoji.emoji}
-          </div>
-        ))}
+        {floatingEmojis.map(emoji => (<div key={emoji.id} className="absolute pointer-events-none rounded-full" style={{ left: `${emoji.left}%`, bottom: '24px' }}>{emoji.emoji}</div>))}
       </div>
-
     </div>
   );
 }
