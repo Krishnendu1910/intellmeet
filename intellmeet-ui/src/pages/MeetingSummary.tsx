@@ -188,7 +188,7 @@ export default function MeetingSummary() {
                     );
                   }
                   if (line.trim().startsWith('-') || line.trim().startsWith('*')) {
-                    return <li key={i} className="ml-4 mb-2 text-cyan-300">{line.replace(/^[-*]/, '').trim()}</li>
+                    return <p key={i} className="ml-4 mb-2 text-cyan-300">{line.replace(/^[-*]/, '').trim()}</p>
                   }
                   return <p key={i} className="mb-3">{line}</p>;
                 })}
@@ -207,7 +207,7 @@ export default function MeetingSummary() {
               </h2>
 
               {pieChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={160}>
+                <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
                     <Pie data={pieChartData} dataKey="value">
                       {pieChartData.map((entry, i) => (
